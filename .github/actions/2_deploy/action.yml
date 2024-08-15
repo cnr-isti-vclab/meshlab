@@ -1,0 +1,74 @@
+name: 'Deploy'
+description: 'Deploy'
+
+inputs:
+  mac-certificate:
+    description: 'MacOS Certificate'
+    required: false
+    default: ''
+  mac-certificate-id:
+    description: 'MacOS Certificate ID'
+    required: false
+    default: ''
+  mac-certificate-pssw:
+    description: 'MacOS Certificate Password'
+    required: false
+  mac-notarization-user:
+    description: 'MacOS Notarization User'
+    required: false
+    default: ''
+  mac-notarization-team:
+    description: 'MacOS Notarization Team'
+    required: false
+    default: ''
+  mac-notarization-pssw:
+    description: 'MacOS Notarization Password'
+    required: false
+    default: ''
+  win-certificate:
+    description: 'Windows Certificate'
+    required: false
+    default: ''
+  win-certificate-pssw:
+    description: 'Windows Certificate Password'
+    required: false
+    default: ''
+  use-brew-qt:
+    description: 'Qt Option'
+    required: false
+    default: 'false'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Notarization settings
+      id: envs
+      shell: bash
+      run: |
+        if [ "${{ inputs.mac-notarization-user }}" != "" ]; then
+          echo "not_setting=--notarization_user='${{ inputs.mac-notarization-user }}' --notarization_team='${{ inputs.mac-notarization-team }}' --notarization_pssw='${{ inputs.mac-notarization-pssw }}'" >> $GITHUB_OUTPUT
+        else
+          echo "not_setting=" >> $GITHUB_OUTPUT
+        fi
+        if [ "${{ inputs.use-brew-qt }}" == "true" ]; then
+          echo "qt-option=--use_brew_qt" >> $GITHUB_OUTPUT
+        else
+          echo "qt-option=" >> $GITHUB_OUTPUT
+        fi
+    - name: Set CodeSign Certificate macOS
+      if: ${{ runner.os  == 'macOS' && inputs.mac-certificate != ''}} 
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ inputs.mac-certificate }}
+        p12-password: ${{ inputs.mac-certificate-pssw }}
+    - name: Set CodeSign Certificate Windows
+      shell: powershell
+      if: ${{ runner.os == 'Windows' && inputs.win-certificate != '' }}
+      run: |
+        New-Item -ItemType directory -Path certificate
+        Set-Content -Path certificate\certificate.txt -Value '${{ inputs.win-certificate }}'
+        certutil -decode certificate\certificate.txt certificate\certificate.pfx
+    - name: Deploy
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/2_deploy.sh ${{ steps.envs.outputs.qt-option }} --cert_pssw='${{ inputs.win-certificate-pssw }}' --cert_id='${{ inputs.mac-certificate-id }}' ${{ steps.envs.outputs.not_setting }}

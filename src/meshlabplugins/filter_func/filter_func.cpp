@@ -22,16 +22,32 @@
  ****************************************************************************/
 
 #include "filter_func.h"
+#include <random>
 #include <vcg/complex/algorithms/create/platonic.h>
-
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
 #include "muParser.h"
 #include "string_conversion.h"
 
+#include <random>
+
 using namespace mu;
 using namespace vcg;
+
+std::random_device randomDev;
+std::default_random_engine rndEngine(randomDev());
+//Function to generate a random double number in [0..1) interval
+double ML_Rnd() { return std::generate_canonical<double, 24>(rndEngine); }
+//Function to generate a random integer number in [0..a) interval
+double ML_RandInt(const double a) { return std::floor(a*ML_Rnd()); }
+
+//Add rnd() and randint() custom functions to a mu::Parser
+void setCustomFunctions(mu::Parser& p)
+{
+	p.DefineFun("rnd", ML_Rnd);
+	p.DefineFun("randInt", ML_RandInt);
+}
 
 // Constructor
 FilterFunctionPlugin::FilterFunctionPlugin()
@@ -123,32 +139,47 @@ QString FilterFunctionPlugin::pythonFilterName(ActionIDType f) const
 }
 
 const QString PossibleOperators(
-	"<br>It's possible to use parenthesis <b>()</b>, and predefined operators:<br>"
+	"<br>It's possible to use any of the predefined muparser built-in "
+	"<a href='https://beltoforion.de/en/muparser/features.php#idDef2'>operators</a> and "
+	"<a href='https://beltoforion.de/en/muparser/features.php#idDef1'>functions</a>, like: "
 	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, "
-	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator)<br><br>");
+	"<b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator), and "
+	"<b>rnd()</b> (random value in [0..1]), and these values:" );
 
 const QString PerVertexAttributeString(
-	"It's possible to use the following per-vertex variables in the expression:<br>"
+	"<ul><li>Per-vertex variables:<br>"
 	"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> "
 	"(quality), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture "
-	"index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
-	"and all custom <i>vertex attributes</i> already defined by user."
-	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br>");
+	"index), <b>vsel</b> ( 1 if selected, 0 if not selected)."
+	"</li><li>Bounding Box variables:<br>"
+	"<b>xmin,ymin,zmin</b> (min coordinates), <b>xmax,ymax,zmax</b> (max coordinates), "
+	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), "
+	"<b>bbdiag</b> (diagonal length)"
+	"</li><li>User-defined attributes:<br>"
+	"All user defined custom <i>vertex attributes</i> are available. "
+	"Point3 attribute are available as 3 variables with _x, _y, _z appended to the attribute name."
+	"</li></ul>");
 
 const QString PerFaceAttributeString(
-	"It's possible to use the following per-face variables, or variables associated to the three "
-	"vertex of every face:<br>"
-	"<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex "
-	"position, <b>x2,y2,z2</b> for the third vertex position, "
-	"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 "
-	"r2,g2,b2,a2</b> for vertex colors, <b>vi0, vi1, vi2</b> for vertex indices, "
-	"<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> for per-wedge "
-	"texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex "
-	"selection (1 yes, 0 no) "
-	"<b>fi</b> for face index, <b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, "
-	"<b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no)."
-	"All user defined <i>face scalar attributes</i> are available."
-	"Point3 attribute are available as three variables with _x, _y, _z appended to the attribute name.<br><br>");
+	"<ul><li>Per-face variables:<br>"
+	"<b>fi</b> (face index), <b>fr,fg,fb,fa</b> (face color), <b>fq</b> (face quality), "
+	"<b>fnx,fny,fnz</b> (face normal), <b>fsel</b> ( 1 if face is selected, 0 if not selected)."
+	"</li><li>Per-vertex variables:<br>"
+	"<b>x0,y0,z0</b> (first vertex position), <b>x1,y1,z1</b> (second vertex position),"
+	"<b>x2,y2,z2</b> (third vertex position), "
+	"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> (vertex normals), <b>r0,g0,b0,a0 r1,g1,b1,a1 "
+	"r2,g2,b2,a2</b> (vertex colors), <b>vi0, vi1, vi2</b> (vertex indices), "
+	"<b>q0,q1,q2</b> (vertex quality), <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> (per-wedge texture coords), "
+	"<b>ti</b> (face texture index), <b>vsel0,vsel1,vsel2</b> (1 if vertex is selected, 0 if not)."
+	"</li><li>Bounding Box variables:<br>"
+	"<b>xmin,ymin,zmin</b> (min coordinates), <b>xmax,ymax,zmax</b> (max coordinates), "
+	"<b>xmid,ymid,zmid</b> (midpoint coordinates), <b>xdim,ydim,zdim</b> (dimensions), "
+	"<b>bbdiag</b> (diagonal length)."
+	"</li><li>User-defined attributes:<br>"
+	"All user defined custom <i>face scalar attributes</i> are available. "
+	"Point3 attribute are available as 3 variables with _x, _y, _z appended to the attribute name."
+	"</li></ul>");
+
 
 // long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(ActionIDType filterId) const
@@ -694,6 +725,24 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		md.addNewMesh("", this->filterName(ID(filter)));
 	MeshModel& m = *(md.mm());
 	Q_UNUSED(cb);
+
+	//Set values to parser variables related to BBox
+	const auto &bbox = m.cm.bbox;
+	xmin = bbox.min.X();
+	ymin = bbox.min.Y();
+	zmin = bbox.min.Z();
+	xmax = bbox.max.X();
+	ymax = bbox.max.Y();
+	zmax = bbox.max.Z();
+	xdim = bbox.DimX();
+	ydim = bbox.DimY();
+	zdim = bbox.DimZ();
+	bbdiag = bbox.Diag();
+	auto bbCenter = bbox.Center();
+	xmid = bbCenter.X();
+	ymid = bbCenter.Y();
+	zmid = bbCenter.Z();
+
 	switch (ID(filter)) {
 	case FF_VERT_SELECTION: {
 		std::string expr  = par.getString("condSelect").toStdString();
@@ -701,7 +750,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		// muparser initialization and explicitly define parser variables
 		Parser p;
+
 		setPerVertexVariables(p, m.cm);
+		setCustomFunctions(p);
 
 		// set expression inserted by user as string (required by muparser)
 		p.SetExpr(wexpr);
@@ -747,7 +798,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and explicitly define parser variables
 		Parser p;
 		setPerFaceVariables(p, m.cm);
-
+		setCustomFunctions(p);
+		
 		// set expression inserted by user as string (required by muparser)
 		p.SetExpr(conversion::fromStringToWString(select.toStdString()));
 
@@ -815,11 +867,15 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and explicitly define parser variables
 		// function for x,y and z must use different parser and variables
 		Parser p1, p2, p3, p4;
-
 		setPerVertexVariables(p1, m.cm);
 		setPerVertexVariables(p2, m.cm);
 		setPerVertexVariables(p3, m.cm);
 		setPerVertexVariables(p4, m.cm);
+
+		setCustomFunctions(p1);
+		setCustomFunctions(p2);
+		setCustomFunctions(p3);
+		setCustomFunctions(p4);
 
 		p1.SetExpr(conversion::fromStringToWString(func_x));
 		p2.SetExpr(conversion::fromStringToWString(func_y));
@@ -916,6 +972,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		Parser p;
 		setPerVertexVariables(p, m.cm);
 
+		//Add rnd() and randInt() internal functions
+		setCustomFunctions(p);
+
 		// set expression to calc with parser
 		p.SetExpr(conversion::fromStringToWString(func_q));
 
@@ -975,6 +1034,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		Parser pu, pv;
 		setPerVertexVariables(pu, m.cm);
 		setPerVertexVariables(pv, m.cm);
+		setCustomFunctions(pu);
+		setCustomFunctions(pv);
 
 		// set expression to calc with parser
 #ifdef _UNICODE
@@ -1033,6 +1094,12 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(pv1, m.cm);
 		setPerFaceVariables(pu2, m.cm);
 		setPerFaceVariables(pv2, m.cm);
+		setCustomFunctions(pu0);
+		setCustomFunctions(pv0);
+		setCustomFunctions(pu1);
+		setCustomFunctions(pv1);
+		setCustomFunctions(pu2);
+		setCustomFunctions(pv2);
 
 		// set expression to calc with parser
 		pu0.SetExpr(conversion::fromStringToWString(func_u0));
@@ -1082,6 +1149,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p_nx, m.cm);
 		setPerFaceVariables(p_ny, m.cm);
 		setPerFaceVariables(p_nz, m.cm);
+		setCustomFunctions(p_nx);
+		setCustomFunctions(p_ny);
+		setCustomFunctions(p_nz);
+			
 		p_nx.SetExpr(conversion::fromStringToWString(func_nx));
 		p_ny.SetExpr(conversion::fromStringToWString(func_ny));
 		p_nz.SetExpr(conversion::fromStringToWString(func_nz));
@@ -1154,6 +1225,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p2, m.cm);
 		setPerFaceVariables(p3, m.cm);
 		setPerFaceVariables(p4, m.cm);
+		setCustomFunctions(p1);
+		setCustomFunctions(p2);
+		setCustomFunctions(p3);
+		setCustomFunctions(p4);
 
 		p1.SetExpr(conversion::fromStringToWString(func_r));
 		p2.SetExpr(conversion::fromStringToWString(func_g));
@@ -1227,6 +1302,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		// muparser initialization and define custom variables
 		Parser pf;
 		setPerFaceVariables(pf, m.cm);
+		setCustomFunctions(pf);
 
 		// set expression to calc with parser
 		pf.SetExpr(conversion::fromStringToWString(func_q));
@@ -1286,6 +1362,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		Parser p;
 		setPerVertexVariables(p, m.cm);
+		setCustomFunctions(p);
 
 		p.SetExpr(conversion::fromStringToWString(expr));
 
@@ -1338,6 +1415,7 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 			h = tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(m.cm, name);
 		Parser p;
 		setPerFaceVariables(p, m.cm);
+		setCustomFunctions(p);		
 		p.SetExpr(conversion::fromStringToWString(expr));
 
 		time_t start = clock();
@@ -1384,6 +1462,10 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerVertexVariables(p_x, m.cm);
 		setPerVertexVariables(p_y, m.cm);
 		setPerVertexVariables(p_z, m.cm);
+		setCustomFunctions(p_x);
+		setCustomFunctions(p_y);
+		setCustomFunctions(p_z);
+
 		p_x.SetExpr(conversion::fromStringToWString(x_expr));
 		p_y.SetExpr(conversion::fromStringToWString(y_expr));
 		p_z.SetExpr(conversion::fromStringToWString(z_expr));
@@ -1443,6 +1525,9 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 		setPerFaceVariables(p_x, m.cm);
 		setPerFaceVariables(p_y, m.cm);
 		setPerFaceVariables(p_z, m.cm);
+		setCustomFunctions(p_x);
+		setCustomFunctions(p_y);
+		setCustomFunctions(p_z);
 		p_x.SetExpr(conversion::fromStringToWString(x_expr));
 		p_y.SetExpr(conversion::fromStringToWString(y_expr));
 		p_z.SetExpr(conversion::fromStringToWString(z_expr));
@@ -1524,6 +1609,8 @@ std::map<std::string, QVariant> FilterFunctionPlugin::applyFilter(
 
 		Parser p;
 		double x, y, z;
+		setCustomFunctions(p);
+		
 		p.DefineVar(conversion::fromStringToWString("x"), &x);
 		p.DefineVar(conversion::fromStringToWString("y"), &y);
 		p.DefineVar(conversion::fromStringToWString("z"), &z);
@@ -1760,6 +1847,15 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator& fi, CMeshO& m)
 	
 }
 
+ // Generate a random double in [0.0, 1.0] interval
+double FilterFunctionPlugin::random()
+{
+	std::random_device rd;  // Seed for the random number engine
+    std::mt19937 gen(rd()); // Mersenne Twister engine
+    std::uniform_real_distribution<double> dis(0.0, 1.0);
+    return dis(gen);  // Generate a random double in [0.0, 1.0]
+}
+
 // Function explicitly define parser variables to perform per-vertex filter action
 // x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
 // and q for quality
@@ -1781,6 +1877,24 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser& p, CMeshO& m)
 	p.DefineVar(conversion::fromStringToWString("vtv"), &vtv);
 	p.DefineVar(conversion::fromStringToWString("ti"), &ti);
 	p.DefineVar(conversion::fromStringToWString("vsel"), &vsel);
+
+    //Add tokens related to mesh bounding box
+	p.DefineVar(conversion::fromStringToWString("xmin"), &xmin);
+	p.DefineVar(conversion::fromStringToWString("ymin"), &ymin);
+	p.DefineVar(conversion::fromStringToWString("zmin"), &zmin);
+	p.DefineVar(conversion::fromStringToWString("xmax"), &xmax);
+	p.DefineVar(conversion::fromStringToWString("ymax"), &ymax);
+	p.DefineVar(conversion::fromStringToWString("zmax"), &zmax);
+	p.DefineVar(conversion::fromStringToWString("bbdiag"), &bbdiag);
+	p.DefineVar(conversion::fromStringToWString("xdim"), &xdim);
+	p.DefineVar(conversion::fromStringToWString("ydim"), &ydim);
+	p.DefineVar(conversion::fromStringToWString("zdim"), &zdim);
+	p.DefineVar(conversion::fromStringToWString("xmid"), &xmid);
+	p.DefineVar(conversion::fromStringToWString("ymid"), &ymid);
+	p.DefineVar(conversion::fromStringToWString("zmid"), &zmid);
+
+	//Add function rnd() 
+	p.DefineFun("rnd", random);
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
@@ -1909,6 +2023,24 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser& p, CMeshO& m)
 	p.DefineVar(conversion::fromStringToWString("vsel1"), &vsel1);
 	p.DefineVar(conversion::fromStringToWString("vsel2"), &vsel2);
 	p.DefineVar(conversion::fromStringToWString("fsel"), &fsel);
+
+    //Add tokens related to mesh bounding box
+	p.DefineVar(conversion::fromStringToWString("xmin"), &xmin);
+	p.DefineVar(conversion::fromStringToWString("ymin"), &ymin);
+	p.DefineVar(conversion::fromStringToWString("zmin"), &zmin);
+	p.DefineVar(conversion::fromStringToWString("xmax"), &xmax);
+	p.DefineVar(conversion::fromStringToWString("ymax"), &ymax);
+	p.DefineVar(conversion::fromStringToWString("zmax"), &zmax);
+	p.DefineVar(conversion::fromStringToWString("bbdiag"), &bbdiag);
+	p.DefineVar(conversion::fromStringToWString("xdim"), &xdim);
+	p.DefineVar(conversion::fromStringToWString("ydim"), &ydim);
+	p.DefineVar(conversion::fromStringToWString("zdim"), &zdim);
+	p.DefineVar(conversion::fromStringToWString("xmid"), &xmid);
+	p.DefineVar(conversion::fromStringToWString("ymid"), &ymid);
+	p.DefineVar(conversion::fromStringToWString("zmid"), &zmid);
+
+	//Add function rnd() 
+	p.DefineFun("rnd", random);
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed

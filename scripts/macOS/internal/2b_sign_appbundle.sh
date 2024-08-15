@@ -24,3 +24,5 @@ esac
 done
 
 codesign --options "runtime" --timestamp --force --deep --sign $CERT_ID $INSTALL_PATH/meshlab.app
+
+spctl -a -vvv $INSTALL_PATH/meshlab.app

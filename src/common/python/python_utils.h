@@ -67,7 +67,7 @@ const static std::array<QString, 14> saveCapabilitiesStrings = {
 };
 
 const char PYTHON_TYPE_ENUM[] = "str";
-const char PYTHON_TYPE_ABSPERC[] = "Percentage";
+const char PYTHON_TYPE_ABSPERC[] = "PercentageValue";
 const char PYTHON_TYPE_DYNAMIC_FLOAT[] = "float (bounded)";
 const char PYTHON_TYPE_BOOL[] = "bool";
 const char PYTHON_TYPE_INT[] = "int";

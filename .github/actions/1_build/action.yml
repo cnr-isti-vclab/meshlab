@@ -1,0 +1,60 @@
+name: 'Build'
+description: 'Build'
+
+inputs:
+  cache-path:
+    description: 'Directory to cache after build'
+    required: false
+    default: ''
+  cache-key:
+    description: 'Cache key'
+    required: false
+    default: ''
+  build-precision:
+    description: 'Build precision'
+    required: false
+    default: ''
+  build-options:
+    description: 'Build options'
+    required: false
+    default: ''
+  nightly:
+    description: 'Nightly build'
+    required: false
+    type: boolean
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup env variables
+      id: envs
+      shell: bash
+      run: |
+        if [ "${{ inputs.build-precision }}" != "" ]; then
+          echo "build_option=--${{ inputs.build-precision }}" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_${{ inputs.build-precision }}" >> $GITHUB_OUTPUT
+        else
+          echo "build_option=" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+        fi
+        if [ "${{ inputs.nightly }}" = "true" ]; then
+          echo "nightly=--nightly" >> $GITHUB_OUTPUT
+        else
+          echo "nightly=" >> $GITHUB_OUTPUT
+        fi
+    - name: Cache external libraries sources
+      id: cache-ext-libs
+      if: ${{ inputs.cache-path != '' }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.cache-path }}
+        key: ${{ runner.os }}-${{ inputs.cache-key }}
+    - name: Ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-${{ github.ref }}-${{ inputs.build-precision }}
+    - name: Configure and Build
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/1_build.sh ${{ steps.envs.outputs.build_option }} ${{ inputs.build-options }} ${{ steps.envs.outputs.nightly }} --ccache

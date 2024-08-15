@@ -5,14 +5,16 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR "Allow download and use of levmar source" ON)
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
-	set(LEVMAR_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/levmar-2.6")
+	set(LEVMAR_VERSION "2.6.1")
+
+	set(LEVMAR_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/levmar-${LEVMAR_VERSION}")
 	set(LEVMAR_CHECK "${LEVMAR_DIR}/lm.h")
 
 	if (NOT EXISTS ${LEVMAR_CHECK})
 		set(LEVMAR_LINK
-			http://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz
-			https://www.meshlab.net/data/libs/levmar-2.6.tgz)
-		set(LEVMAR_MD5 16bc34efa1617219f241eef06427f13f)
+			https://github.com/alemuntoni/levmar/archive/refs/tags/${LEVMAR_VERSION}.zip
+			https://www.meshlab.net/data/libs/levmar-${LEVMAR_VERSION}.zip)
+		set(LEVMAR_MD5 ecc22109fcad6575645de6e1a87d2ea3)
 		download_and_unzip(
 			NAME "Levmar"
 			LINK ${LEVMAR_LINK}

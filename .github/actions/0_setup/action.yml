@@ -1,0 +1,39 @@
+name: 'Setup Environment'
+description: 'Setup Environment'
+
+inputs:
+  use-jurpel-qt-action:
+    description: 'Use jurpel/qt-action'
+    required: false
+    type: boolean
+    default: true
+  qt-version:
+    description: 'Qt Version'
+    required: false
+    default: '5.15.2'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Check
+      shell: bash
+      run: |
+        echo "Install Qt Action: ${{ inputs.use-jurpel-qt-action }}"
+    - name: Install Qt
+      if: inputs.use-jurpel-qt-action == 'true'
+      uses: jurplel/install-qt-action@v3
+      with:
+        cache: true
+        version: ${{ inputs.qt-version }}
+    - name: Install dependencies
+      if: inputs.use-jurpel-qt-action == 'true'
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt
+    - name: Install dependencies
+      if: inputs.use-jurpel-qt-action == 'false'
+      shell: bash
+      run: |
+        bash scripts/${{ runner.os }}/0_setup_env.sh

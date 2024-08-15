@@ -27,6 +27,12 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
 			DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
 		if (NOT download_and_unzip_SUCCESS)
 			message(STATUS "- Qhull - download failed.")
+		else()
+			# remove target uninstall to avoid duplicates
+			# todo - make PR to Qhull to solve this
+			file(READ "${QHULL_DIR}/CMakeLists.txt" FILE_CONTENTS)
+			string(REPLACE "uninstall" "qhull-uninstall" FILE_CONTENTS "${FILE_CONTENTS}")
+			file(WRITE "${QHULL_DIR}/CMakeLists.txt" "${FILE_CONTENTS}")
 		endif()
 	endif()
 

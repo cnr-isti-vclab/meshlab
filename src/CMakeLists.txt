@@ -21,8 +21,8 @@ find_package(OpenMP)
 find_package(Threads)
 
 message(STATUS "Searching for required components with bundled fallback")
-find_package(GLEW)
-find_package(Eigen3)
+find_package(GLEW QUIET)
+find_package(Eigen3 QUIET)
 
 set(MESHLAB_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../resources)
 
@@ -60,7 +60,7 @@ if (MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS) # otherwise, we assume that all 
 
 	### Install Settings
 	if (NOT APPLE)
-		set(CMAKE_INSTALL_RPATH $ORIGIN/../lib/meshlab)
+		set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR})
 	else()
 		SET(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
 	endif()
@@ -152,6 +152,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_cubization
 		meshlabplugins/filter_developability
 		meshlabplugins/filter_dirt
+		meshlabplugins/filter_embree
 		meshlabplugins/filter_fractal
 		meshlabplugins/filter_func
 		meshlabplugins/filter_img_patch_param
@@ -161,6 +162,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 		meshlabplugins/filter_layer
 		meshlabplugins/filter_measure
 		meshlabplugins/filter_mesh_booleans
+		meshlabplugins/filter_mesh_alpha_wrap
 		meshlabplugins/filter_meshing
 		meshlabplugins/filter_mls
 		meshlabplugins/filter_mutualglobal

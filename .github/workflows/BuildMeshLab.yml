@@ -6,6 +6,7 @@ on:
 env:
   QT_VERSION: 5.15.2
   MAC_CERT: ${{secrets.MACOS_CERT_ID}}
+  MAC_CERT_PSSW: ${{secrets.MACOS_CERTIFICATE_PSSW}}
   WIN_CERT: ${{secrets.WIN_CERTIFICATE}}
 
 jobs:
@@ -15,69 +16,56 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-18.04', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-20.04', 'macos-13', 'macos-latest', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Set CodeSign Certificate macOS
-      if: runner.os == 'macOS' && env.MAC_CERT != null
-      uses: apple-actions/import-codesign-certs@v1
+    - name: Setup Environment
+      uses: ./.github/actions/0_setup
       with:
-        p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-        p12-password: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
-    - name: Set CodeSign Certificate Windows
-      if: runner.os == 'Windows' && env.WIN_CERT != null
-      run: |
-        New-Item -ItemType directory -Path certificate
-        Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_CERTIFICATE }}'
-        certutil -decode certificate\certificate.txt certificate\certificate.pfx
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        cache: true
-        version: ${{ env.QT_VERSION }}
-    - name: Install dependencies
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/0_setup_env.sh --dont_install_qt --dont_install_cgal_and_boost
+        qt-version: ${{env.QT_VERSION}}
+        use-jurpel-qt-action: ${{matrix.os != 'macos-latest'}}
     - name: Setup env variables
       id: envs
       shell: bash
       run: |
+        ARCH=$(uname -m)
         if [ "${{matrix.precision}}" == "double_precision" ]; then
-          echo "artifact_suffix=_double" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_double_$ARCH" >> $GITHUB_OUTPUT
         else
-          echo "artifact_suffix=" >> $GITHUB_OUTPUT
+          echo "artifact_suffix=_$ARCH" >> $GITHUB_OUTPUT
         fi
-    - name: Cache external libraries sources
-      id: cache-ext-libs
-      uses: actions/cache@v3
+        if [ "${{matrix.os}}" == "macos-latest" ]; then
+          echo "build_options=--use_brew_qt" >> $GITHUB_OUTPUT
+        else
+          echo "build_options=" >> $GITHUB_OUTPUT
+        fi
+    - name: Build
+      uses: ./.github/actions/1_build
       with:
-        path: src/external/downloads/*
-        key: ${{ runner.os }}-external-libraries
-    - name: Ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ runner.os }}-${{ github.ref }}-${{ matrix.precision }}
-    - name: Configure and Build
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/1_build.sh --${{ matrix.precision }} --nightly --ccache
+        cache-path: src/external/downloads/*
+        cache-key: external-libraries
+        build-precision: ${{matrix.precision}}
+        build-options: ${{steps.envs.outputs.build_options}}
+        nightly: true
     - name: Deploy
-      shell: bash
-      run: |
-        bash scripts/${{ runner.os }}/2_deploy.sh --cert_pssw='${{ secrets.WIN_CERTIFICATE_PSSW }}' --cert_id=${{ secrets.MACOS_CERT_ID }}
+      uses: ./.github/actions/2_deploy
+      with:
+        use-brew-qt: ${{matrix.os == 'macos-latest'}}
+        mac-certificate: ${{ secrets.MACOS_CERTIFICATE }}
+        mac-certificate-id: ${{ secrets.MACOS_CERT_ID }}
+        mac-certificate-pssw: ${{ secrets.MACOS_CERTIFICATE_PSSW }}
+        win-certificate: ${{ secrets.WIN_CERTIFICATE }}
+        win-certificate-pssw: ${{ secrets.WIN_CERTIFICATE_PSSW }}
     - name: Upload MeshLab Portable
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/
     - name: Upload MeshLab Packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
         path: packages/MeshLab*

@@ -1,0 +1,27 @@
+services:
+  devcontainer:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    # flag -e DISPLAY=$DISPLAY
+    environment:
+      DISPLAY: $DISPLAY
+    volumes:
+      - ..:/workspaces/meshlab
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # Next flags are necessary to deploy meshlab and create the AppImage
+      # fuse is needed. If you don't plan to create the AppImage, you can remove the 
+      # following lines
+      - /lib/modules:/lib/modules
+    # flag --device /dev/fuse
+    devices:
+      - /dev/fuse
+    # flag --cap-add SYS_ADMIN
+    cap_add:
+      - SYS_ADMIN
+    # flag --security-opt apparmor:unconfined
+    security_opt:
+      - apparmor:unconfined

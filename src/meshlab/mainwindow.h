@@ -70,7 +70,7 @@ public:
 	void updateGlobalParameterList(const RichParameterList& rpl);
 
 	std::ptrdiff_t maxgpumem;
-	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
+	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry"; }
 
 	//bool permeshtoolbar;
 	//inline static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
@@ -79,22 +79,28 @@ public:
 	inline static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
 
 	size_t perbatchprimitives;
-	inline static QString perBatchPrimitives() {return "MeshLab::System::perBatchPrimitives";}
+	inline static QString perBatchPrimitives() {return "MeshLab::System::perBatchPrimitives"; }
 
 	size_t minpolygonpersmoothrendering;
 	inline static QString minFaceNumberPerSmoothRendering() { return "MeshLab::System::minFaceNumberPerSmoothRendering"; }
 
 	std::ptrdiff_t maxTextureMemory;
-	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
+	inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory"; }
 	  
 	int startupWindowWidth;
-	inline static QString startupWindowWidthParam() {return "MeshLab::System::startupWindowWidth";}
+	inline static QString startupWindowWidthParam() {return "MeshLab::System::startupWindowWidth"; }
 
 	int startupWindowHeight;
-	inline static QString startupWindowHeightParam() {return "MeshLab::System::startupWindowHeight";}
+	inline static QString startupWindowHeightParam() {return "MeshLab::System::startupWindowHeight"; }
 
 	QString meshSetName;
-	inline static QString meshSetNameParam() {return "MeshLab::System::meshSetName";};
+	inline static QString meshSetNameParam() {return "MeshLab::System::meshSetName"; }
+	
+	bool checkForUpdate;
+	inline static QString checkForUpdateParam() {return "MeshLab::System::checkForUpdate"; }
+
+	bool sendAnonymousData;
+	inline static QString sendAnonymousDataParam() {return "MeshLab::System::sendAnonymousData"; }
 };
 
 class MainWindow : public QMainWindow
@@ -241,7 +247,7 @@ private slots:
 
 	void dropEvent ( QDropEvent * event );
 	void dragEnterEvent(QDragEnterEvent *);
-	void connectionDone(QNetworkReply *reply);
+	void checkForUpdatesConnectionDone(QNetworkReply *reply);
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);

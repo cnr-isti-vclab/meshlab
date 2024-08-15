@@ -43,25 +43,28 @@ namespace meshlab {
 // From eigen to CMeshO
 CMeshO meshFromMatrices(
 	const EigenMatrixX3m&   vertices,
-	const Eigen::MatrixX3i& faces         = Eigen::MatrixX3i(),
-	const Eigen::MatrixX2i& edges         = Eigen::MatrixX2i(),
-	const EigenMatrixX3m&   vertexNormals = EigenMatrixX3m(),
-	const EigenMatrixX3m&   faceNormals   = EigenMatrixX3m(),
-	const EigenVectorXm&    vertexQuality = EigenVectorXm(),
-	const EigenVectorXm&    faceQuality   = EigenVectorXm(),
-	const EigenMatrixX4m&   vertexColor   = EigenMatrixX4m(),
-	const EigenMatrixX4m&   faceColor     = EigenMatrixX4m());
+	const Eigen::MatrixX3i& faces           = Eigen::MatrixX3i(),
+	const Eigen::MatrixX2i& edges           = Eigen::MatrixX2i(),
+	const EigenMatrixX3m&   vertexNormals   = EigenMatrixX3m(),
+	const EigenMatrixX3m&   faceNormals     = EigenMatrixX3m(),
+	const EigenVectorXm&    vertexQuality   = EigenVectorXm(),
+	const EigenVectorXm&    faceQuality     = EigenVectorXm(),
+	const EigenMatrixX4m&   vertexColor     = EigenMatrixX4m(),
+	const EigenMatrixX4m&   faceColor       = EigenMatrixX4m(),
+	const EigenMatrixX2m&   vertexTexCoords = EigenMatrixX2m(),
+	const EigenMatrixX2m&   wedgeTexCoords  = EigenMatrixX2m());
 
 // From eigen to polygonal CMeshO
 CMeshO polyMeshFromMatrices(
 	const EigenMatrixX3m&            vertices,
 	const std::list<EigenVectorXui>& faces,
-	const EigenMatrixX3m&            vertexNormals = EigenMatrixX3m(),
-	const EigenMatrixX3m&            faceNormals   = EigenMatrixX3m(),
-	const EigenVectorXm&             vertexQuality = EigenVectorXm(),
-	const EigenVectorXm&             faceQuality   = EigenVectorXm(),
-	const EigenMatrixX4m&            vertexColor   = EigenMatrixX4m(),
-	const EigenMatrixX4m&            faceColor     = EigenMatrixX4m());
+	const EigenMatrixX3m&            vertexNormals   = EigenMatrixX3m(),
+	const EigenMatrixX3m&            faceNormals     = EigenMatrixX3m(),
+	const EigenVectorXm&             vertexQuality   = EigenVectorXm(),
+	const EigenVectorXm&             faceQuality     = EigenVectorXm(),
+	const EigenMatrixX4m&            vertexColor     = EigenMatrixX4m(),
+	const EigenMatrixX4m&            faceColor       = EigenMatrixX4m(),
+	const EigenMatrixX2m&            vertexTexCoords = EigenMatrixX2m());
 
 void addVertexScalarAttribute(
 	CMeshO&              mesh,

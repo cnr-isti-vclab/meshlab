@@ -83,7 +83,7 @@ QString AmbientOcclusionPlugin::filterName(ActionIDType filterId) const
 QString AmbientOcclusionPlugin::pythonFilterName(ActionIDType f) const
 {
 	switch (f) {
-	case FP_AMBIENT_OCCLUSION: return QString("compute_scalar_ambient_occlusion");
+	case FP_AMBIENT_OCCLUSION: return QString("compute_scalar_ambient_occlusion_gpu");
 	default: assert(0); return QString();
 	}
 }

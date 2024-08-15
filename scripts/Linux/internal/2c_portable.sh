@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s extglob
+
 SCRIPTS_PATH="$(dirname "$(realpath "$0")")"/..
 RESOURCES_PATH=$SCRIPTS_PATH/../../resources
 INSTALL_PATH=$SCRIPTS_PATH/../../install
@@ -29,14 +31,16 @@ then
     export QMAKE=$QT_DIR/bin/qmake
 fi
 
-$RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
-  --plugin qt
+# Make sure that deploy succeeds before we start deleting files
+if $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH --plugin qt; then
+  # after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
+  # usr/lib/meshlab (except for the ones that are loaded at runtime)
+  cd $INSTALL_PATH/usr/lib/meshlab
+  rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
 
-# after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
-# usr/lib/meshlab (except for the ones that are loaded at runtime)
-shopt -s extglob
-cd $INSTALL_PATH/usr/lib/meshlab
-rm -v !("libIFXCore.so"|"libIFXExporting.so"|"libIFXScheduling.so")
+  echo "$INSTALL_PATH is now a self contained meshlab application"
 
-#at this point, distrib folder contains all the files necessary to execute meshlab
-echo "$INSTALL_PATH is now a self contained meshlab application"
+else
+  echo "linuxdeploy failed with error code $?. Script was not completed successfully."
+  exit 1
+fi
