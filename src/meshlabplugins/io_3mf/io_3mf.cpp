@@ -23,18 +23,22 @@
 
 #include "io_3mf.h"
 
+#include "common/ml_document/cmesh.h"
 #include "common/ml_document/mesh_model.h"
+#include "lib3mf_implicit.hpp"
 #include "lib3mf_types.hpp"
-#include "vcg/complex/algorithms/update/position.h"
+#include "vcg/complex/algorithms/update/color.h"
 #include "vcg/complex/allocate.h"
+#include "vcg/space/color4.h"
 #include "wrap/io_trimesh/io_mask.h"
 
-#include "lib3mf_implicit.hpp"
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
 
 namespace
 {
-
   Lib3MF::PModel get_model_from_file(const QString& fileName)
   {
     const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
@@ -81,8 +85,49 @@ namespace
     return model->GetBuildItems();
   }
 
-  void load_mesh_to_meshmodel(const Lib3MF::PMeshObject& lib3mf_mesh_object, MeshModel& mesh_model, const std::string& name_postfix)
+  void load_mesh_to_meshmodel(const Lib3MF::PModel& model, const Lib3MF::PMeshObject& lib3mf_mesh_object, MeshModel& mesh_model, const std::string& name_postfix)
   {
+
+    auto load_or_get_texture_id = [&mesh_model, &model](const int id)
+    {
+      const std::string string_id = std::to_string(id);
+      const auto& texture = mesh_model.getTexture(string_id);
+      if(texture.isNull())
+      {
+        std::vector<Lib3MF_uint8> buffer;
+        model->GetTexture2DByID(id)->GetAttachment()->WriteToBuffer(buffer);
+        QImage image;
+        image.loadFromData(buffer.data(), buffer.size());
+        mesh_model.addTexture(string_id, image);
+      }
+
+      auto texture_id = std::distance(mesh_model.cm.textures.begin(), std::find(mesh_model.cm.textures.begin(), mesh_model.cm.textures.end(), string_id));
+      return texture_id;
+    };
+
+    std::vector<size_t> available_property_ids;
+
+    auto base_material_groups = model->GetBaseMaterialGroups();
+    while(base_material_groups->MoveNext())
+    {
+      auto current = base_material_groups->GetCurrentBaseMaterialGroup();
+      available_property_ids.push_back(current->GetUniqueResourceID());
+    }
+
+    auto color_groups = model->GetColorGroups();
+    while(color_groups->MoveNext())
+    {
+      auto current = color_groups->GetCurrentColorGroup();
+      available_property_ids.push_back(current->GetUniqueResourceID());
+    }
+
+    auto texture_groups = model->GetTexture2DGroups();
+    while(texture_groups->MoveNext())
+    {
+      auto current = texture_groups->GetCurrentTexture2DGroup();
+      available_property_ids.push_back(current->GetUniqueResourceID());
+    }
+
     std::string mesh_name = lib3mf_mesh_object->GetName();
     if(mesh_name.empty())
     {
@@ -101,6 +146,8 @@ namespace
       (*vertex_iterator).P()[2] = pos[2];
       ++vertex_iterator;
     }
+
+    // Load the triangles only, but no colors yet
     for(size_t i = 0; i < n_triangles; ++i)
     {
       const auto& tri = lib3mf_mesh_object->GetTriangle(i).m_Indices;
@@ -108,6 +155,60 @@ namespace
       (*face_iterator).V(1) = &mesh_model.cm.vert[tri[1]];
       (*face_iterator).V(2) = &mesh_model.cm.vert[tri[2]];
       ++face_iterator;
+    }
+
+    // Load colors or textures, if necessary
+    for(size_t i = 0; i < n_triangles; ++i)
+    {
+      Lib3MF::sTriangleProperties props;
+      lib3mf_mesh_object->GetTriangleProperties(i, props);
+
+      if(std::find_if(available_property_ids.begin(), available_property_ids.end(), [props](auto resourceId){return resourceId == props.m_ResourceID;}) != available_property_ids.end()){
+        const auto& tri = lib3mf_mesh_object->GetTriangle(i).m_Indices;
+        switch(model->GetPropertyTypeByID(props.m_ResourceID))
+        {
+          case Lib3MF::ePropertyType::BaseMaterial:
+          {
+            mesh_model.enable(vcg::tri::io::Mask::IOM_FACECOLOR);
+            auto baseMaterial = model->GetBaseMaterialGroupByID(props.m_ResourceID);
+            auto color = baseMaterial->GetDisplayColor(props.m_PropertyIDs[0]);
+            mesh_model.cm.face[i].C() = vcg::Color4b{color.m_Red, color.m_Green, color.m_Blue, color.m_Alpha};
+            break;
+          }
+          case Lib3MF::ePropertyType::TexCoord:
+          {
+            mesh_model.enable(vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
+            auto group = model->GetTexture2DGroupByID(props.m_ResourceID);
+            auto texture_id = load_or_get_texture_id(group->GetTexture2D()->GetUniqueResourceID());
+            auto coord0 = group->GetTex2Coord(props.m_PropertyIDs[0]);
+            auto coord1 = group->GetTex2Coord(props.m_PropertyIDs[1]);
+            auto coord2 = group->GetTex2Coord(props.m_PropertyIDs[2]);
+
+            mesh_model.cm.face[i].WT(0).U() = coord0.m_U;
+            mesh_model.cm.face[i].WT(0).V() = coord0.m_V;
+            mesh_model.cm.face[i].WT(0).N() = texture_id;
+
+            mesh_model.cm.face[i].WT(1).U() = coord1.m_U;
+            mesh_model.cm.face[i].WT(1).V() = coord1.m_V;
+            mesh_model.cm.face[i].WT(1).N() = texture_id;
+
+            mesh_model.cm.face[i].WT(2).U() = coord2.m_U;
+            mesh_model.cm.face[i].WT(2).V() = coord2.m_V;
+            mesh_model.cm.face[i].WT(2).N() = texture_id;
+            break;
+          }
+          case Lib3MF::ePropertyType::Colors:
+          {
+            mesh_model.enable(vcg::tri::io::Mask::IOM_FACECOLOR);
+            auto colorGroup = model->GetColorGroupByID(props.m_ResourceID);
+            auto color0 = colorGroup->GetColor(props.m_PropertyIDs[0]);
+            mesh_model.cm.face[i].C() = vcg::Color4b{color0.m_Red, color0.m_Green, color0.m_Blue, color0.m_Alpha};
+            break;
+          }
+          default:
+            break;
+        };
+      }
     }
   }
 
@@ -157,7 +258,6 @@ void Lib3MFPlugin::open(
                         const RichParameterList & par,
                         vcg::CallBackPos *cb)
 {
-
   using namespace vcg::tri::io;
 
   const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
@@ -165,7 +265,6 @@ void Lib3MFPlugin::open(
   auto lib3mf_model = get_model_from_file(fileName);
   auto build_item_iterator = get_build_item_iterator(lib3mf_model);
   auto mesh_model_iterator = meshModelList.begin();
-
   if(meshModelList.size() != build_item_iterator->Count())
   {
     throw MLException(errorMsgFormat.arg(fileName, "Internal error while loading mesh objects: inconsistent number of meshes encontered"));
@@ -179,6 +278,7 @@ void Lib3MFPlugin::open(
     {
       throw MLException(errorMsgFormat.arg(fileName, "Failed to access build item"));
     }
+
 
     const auto& object = current_build_item->GetObjectResource();
     if(!object->IsMeshObject())
@@ -199,7 +299,14 @@ void Lib3MFPlugin::open(
       throw MLException(errorMsgFormat.arg(fileName, "Internal error while loading mesh objects: invalid mesh model"));
     }
 
-    load_mesh_to_meshmodel(current_mesh_object, *current_mesh_model, "_" + std::to_string(i_mesh));
+    // TODO (lvk88): even if enable WEDGCOLOR, meshlab will crash when trying to add a per vertex wedge color later on
+    //maskList.push_back(Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX | Mask::IOM_WEDGCOLOR);
+    //current_mesh_model->enable( Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX | Mask::Mask::IOM_WEDGCOLOR);
+
+    maskList.push_back(Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
+    current_mesh_model->enable( Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
+
+    load_mesh_to_meshmodel(lib3mf_model, current_mesh_object, *current_mesh_model, "_" + std::to_string(i_mesh));
 
     if(current_build_item->HasObjectTransform())
     {
@@ -219,11 +326,8 @@ void Lib3MFPlugin::open(
       tr.V()[13] = transform.m_Fields[3][1];
       tr.V()[14] = transform.m_Fields[3][2];
       tr.V()[15] = 1.0;
-      vcg::tri::UpdatePosition<decltype(current_mesh_model->cm)>::Matrix(current_mesh_model->cm, tr.transpose(), true);
+      current_mesh_model->cm.Tr = tr.transpose();
     }
-
-    maskList.push_back(Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
-    current_mesh_model->enable( Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX);
 
     mesh_model_iterator++;
   }
@@ -239,7 +343,8 @@ void Lib3MFPlugin::open(
 {
   using namespace vcg::tri::io;
 
-  mask = Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX;
+  mask = Mask::IOM_VERTCOORD | Mask::IOM_FACEINDEX | Mask::IOM_VERTCOLOR;
+  m.enable(mask);
 
   const QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
@@ -265,7 +370,8 @@ void Lib3MFPlugin::open(
     throw MLException(errorMsgFormat.arg(fileName, "Invalid mesh object encountered"));
   }
 
-  load_mesh_to_meshmodel(mesh_object, m, "_0");
+  load_mesh_to_meshmodel(lib3mf_model, mesh_object, m, "_0");
+  current_build_item->GetObjectResource();
   if(current_build_item->HasObjectTransform())
   {
     auto transform = current_build_item->GetObjectTransform();
@@ -284,7 +390,7 @@ void Lib3MFPlugin::open(
     tr.V()[13] = transform.m_Fields[3][1];
     tr.V()[14] = transform.m_Fields[3][2];
     tr.V()[15] = 1.0;
-    vcg::tri::UpdatePosition<decltype(m.cm)>::Matrix(m.cm, tr.transpose(), true);
+    m.cm.Tr = tr.transpose();
   }
 
   m.enable(mask);
