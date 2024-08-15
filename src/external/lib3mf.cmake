@@ -41,11 +41,28 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
   endif()
 
   if(EXISTS ${LIB3MF_CHECK})
-    message(STATUS " - Lib3MF - using downloaded source")
+    message(STATUS "- Lib3MF - Using downloaded Lib3MF sources")
     set(MESSAGE_QUIET ON)
     set(LIB3MF_TESTS OFF)
     add_subdirectory(${LIB3MF_DIR} EXCLUDE_FROM_ALL)
+
+    # Well, this is extremely ugly
+    # But due to some bug in lib3mf CMake function `generate_product_version`,
+    # it is not possible to build lib3mf with ninja, because the following
+    # error message will appear when processing VersionResource.rc
+    #
+    # fatal error RC1106: invalid option: -3
+    #
+    # I don't know what causes the bug. A workaround is to just simply exclude VersionResource.rc from the list
+    # of sources associated to the lib3mf target.
+    if( WIN32 AND CMAKE_GENERATOR STREQUAL "Ninja" )
+      get_target_property(LIB3MF_SRCS lib3mf SOURCES)
+      LIST(FILTER LIB3MF_SRCS EXCLUDE REGEX "VersionResource.rc")
+      SET_TARGET_PROPERTIES(lib3mf PROPERTIES SOURCES "${LIB3MF_SRCS}")
+    endif()
     unset(MESSAGE_QUIET)
+  else()
+    message(FATAL " - Lib3MF - Could not add lib3mf to source tree ")
   endif()
 
   add_library(external-lib3mf INTERFACE)
