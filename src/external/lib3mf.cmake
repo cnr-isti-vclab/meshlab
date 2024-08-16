@@ -2,7 +2,7 @@
 # MeshLab                                                           o o     #
 # A versatile mesh processing toolbox                             o     o   #
 #                                                                _   O  _   #
-# Copyright(C) 2005                                                \/)\/    #
+# Copyright(C) 2023 - 2024                                         \/)\/    #
 # Visual Computing Lab                                            /\/|      #
 # ISTI - Italian National Research Council                           |      #
 #                                                                    \      #
@@ -48,7 +48,7 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
 
     # Well, this is extremely ugly
     # But due to some bug in lib3mf CMake function `generate_product_version`,
-    # it is not possible to build lib3mf with ninja, because the following
+    # it is not possible to build lib3mf with ninja on Windows, because the following
     # error message will appear when processing VersionResource.rc
     #
     # fatal error RC1106: invalid option: -3
