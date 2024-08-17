@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <exception>
 #include <memory>
 #include <string>
 
@@ -285,6 +286,20 @@ unsigned int Lib3MFPlugin::numberMeshesContainedInFile(
 		throw MLException(
 			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
 	}
+	catch (const std::exception& e) {
+		std::stringstream message_stream;
+		message_stream << "An exception occurred while opening the 3MF file.\n" << e.what();
+		log(message_stream.str());
+		throw MLException(
+			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
+	}
+	catch (...) {
+		std::stringstream message_stream;
+		message_stream << "An unkown error occurred while opening the 3MF file.\n";
+		log(message_stream.str());
+		throw MLException(
+			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
+	}
 }
 
 void Lib3MFPlugin::open(
@@ -398,6 +413,20 @@ void Lib3MFPlugin::open(
 	catch (const Lib3MF::ELib3MFException& e) {
 		std::stringstream message_stream;
 		message_stream << "An exception occurred while opening the 3MF file.\n" << e.what();
+		log(message_stream.str());
+		throw MLException(
+			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
+	}
+	catch (const std::exception& e) {
+		std::stringstream message_stream;
+		message_stream << "An exception occurred while opening the 3MF file.\n" << e.what();
+		log(message_stream.str());
+		throw MLException(
+			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
+	}
+	catch (...) {
+		std::stringstream message_stream;
+		message_stream << "An unkown error occurred while opening the 3MF file.\n";
 		log(message_stream.str());
 		throw MLException(
 			errorMsgFormat.arg(fileName, QString::fromStdString((message_stream.str()))));
