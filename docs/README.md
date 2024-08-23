@@ -1,5 +1,5 @@
    MeshLab
-   http://www.meshlab.net
+   https://www.meshlab.net
    All rights reserved.
 
    VCGLib  http://www.vcglib.net                                         o o
