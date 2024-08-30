@@ -44,7 +44,8 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     python3-pip \
     unzip \
     wget \
-    file
+    file \
+    desktop-file-utils
 
 RUN pip3 install aqtinstall
 
