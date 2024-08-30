@@ -23,6 +23,13 @@ case $i in
 esac
 done
 
+# Ensure appimagetool is in the PATH
+if ! command -v appimagetool &> /dev/null
+then
+    echo "appimagetool could not be found, please install it."
+    exit 1
+fi
+
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
   --output appimage
 
@@ -35,5 +42,8 @@ ML_VERSION=${strarr[1]} #get the meshlab version from the string
 # get running architecture
 ARCH=$(uname -m)
 
-mkdir $PACKAGES_PATH
+# Ensure the packages path exists
+mkdir -p $PACKAGES_PATH
+
+# Move the AppImage to the packages directory
 mv MeshLab-*.AppImage $PACKAGES_PATH/MeshLab$ML_VERSION-linux_$ARCH.AppImage
