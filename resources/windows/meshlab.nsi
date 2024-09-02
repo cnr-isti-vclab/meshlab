@@ -6,7 +6,7 @@
 !define PRODUCT_NAME "MeshLab"
 !define PRODUCT_VERSION "MESHLAB_VERSION"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - VCG - ISTI - CNR"
-!define PRODUCT_WEB_SITE "http://www.meshlab.net"
+!define PRODUCT_WEB_SITE "https://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
