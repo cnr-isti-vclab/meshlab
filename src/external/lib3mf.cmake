@@ -29,7 +29,7 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
 
   if(NOT EXISTS ${LIB3MF_CHECK})
     set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/releases/download/v2.3.2/lib3mf-2.3.2-source-with-submodules.zip)
-    set(LIB3MF_MD5 bb6a4f480c50669ff193d5e418d7500f)
+    set(LIB3MF_MD5 e9f3f40de2bd58c3f9109d657c86f3a8)
     download_and_unzip(
       NAME "Lib3MF"
       MD5  ${LIB3MF_MD5}
