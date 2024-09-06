@@ -24,12 +24,12 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF "Allow download and use of lib3MF source" ON)
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
-  set(LIB3MF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3mf-2.2.0)
+  set(LIB3MF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3mf-2.3.2)
   set(LIB3MF_CHECK ${LIB3MF_DIR}/CMakeLists.txt) 
 
   if(NOT EXISTS ${LIB3MF_CHECK})
-    set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/archive/refs/tags/v2.2.0.zip)
-    set(LIB3MF_MD5 31c6dd3e2599f6f32c0784d8f46480bb)
+    set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/releases/download/v2.3.2/lib3mf-2.3.2-source-with-submodules.zip)
+    set(LIB3MF_MD5 bb6a4f480c50669ff193d5e418d7500f)
     download_and_unzip(
       NAME "Lib3MF"
       MD5  ${LIB3MF_MD5}
