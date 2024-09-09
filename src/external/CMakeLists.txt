@@ -55,6 +55,9 @@ if ((NOT MESHLAB_BUILD_MINI) AND MESHLAB_ALLOW_OPTIONAL_EXTERNAL_LIBRARIES)
 	# lib3ds - optional, for io_3ds
 	include(${CMAKE_CURRENT_SOURCE_DIR}/lib3ds.cmake)
 
+	# lib3mf - optional, for io_3mf
+	include(${CMAKE_CURRENT_SOURCE_DIR}/lib3mf.cmake)
+
 	# libigl - optional for filter_mesh_booleans
 	include(${CMAKE_CURRENT_SOURCE_DIR}/libigl.cmake)
 
