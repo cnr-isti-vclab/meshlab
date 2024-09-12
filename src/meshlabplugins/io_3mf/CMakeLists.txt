@@ -21,14 +21,19 @@
 #                                                                           #
 #############################################################################
 
-set(HEADERS
-	io_3mf.h
-	)
+# Only build if we have lib3mf
+if(TARGET external-lib3mf)
+    set(HEADERS io_3mf.h)
 
-set(SOURCES
-	io_3mf.cpp
-	)
+    set(SOURCES io_3mf.cpp)
 
-add_meshlab_plugin(io_3mf ${SOURCES} ${HEADERS})
+    add_meshlab_plugin(io_3mf ${SOURCES} ${HEADERS})
 
-target_link_libraries(io_3mf PUBLIC external-lib3mf)
+    target_link_libraries(io_3mf PUBLIC external-lib3mf)
+
+else()
+    message(
+        STATUS
+        "Skipping io_3mf - missing lib3mf in external directory."
+    )
+endif()
