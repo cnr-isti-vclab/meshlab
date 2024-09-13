@@ -58,15 +58,25 @@ ShowUnInstDetails show
 Function .onInit
   ReadRegStr $0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   ${If} $0 != "" ;2020.0x...
-    MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
-	StrCpy $8 '"$0"'
-	!insertmacro ExecWaitJob r8
+    ${IfNot} ${Silent}
+      MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
+    ${EndIf}
+    StrCpy $8 '"$0"'
+    ${If} ${Silent}
+      StrCpy $8 "$8 /S"
+    ${EndIf}
+    !insertmacro ExecWaitJob r8
   ${Else}
     ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MeshLab_64b" "UninstallString"
     ${If} $0 != "" ;2016.12
-	  MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
-   	  StrCpy $8 '"$0"'
-	  !insertmacro ExecWaitJob r8
+      ${IfNot} ${Silent}
+        MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
+      ${EndIf}
+      StrCpy $8 '"$0"'
+      ${If} ${Silent}
+        StrCpy $8 "$8 /S"
+      ${EndIf}
+      !insertmacro ExecWaitJob r8
     ${EndIf}
   ${EndIf}
 FunctionEnd
