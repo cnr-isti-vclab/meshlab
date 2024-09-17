@@ -1136,7 +1136,7 @@ void MLRenderingColorPicker::pickColor()
 		return;
 
 	const QColor initialCol = vcg::ColorConverter::ToQColor(_act->getColor());
-	const QColor newCol     = QColorDialog::getColor(initialCol,this);
+	const QColor newCol     = QColorDialog::getColor(initialCol);
 	if (newCol.isValid())
 	{
 		_act->setColor(newCol);
