@@ -23,7 +23,7 @@ case $i in
 esac
 done
 
-$RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
+$RESOURCES_PATH/linux/x86_64/linuxdeploy --appdir=$INSTALL_PATH \
   --output appimage
 
 #get version
