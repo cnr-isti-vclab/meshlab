@@ -44,7 +44,9 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     python3 \
     python3-pip \
     unzip \
-    wget
+    wget \
+    file \
+    desktop-file-utils
 
 RUN pip3 install aqtinstall
 
@@ -66,6 +68,10 @@ RUN wget -qO- "https://cmake.org/files/v3.19/cmake-3.19.2-Linux-x86_64.tar.gz" \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+    && chmod +x appimagetool-x86_64.AppImage \
+    && mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
 
 # Generating a universally unique ID for the Container
 RUN  dbus-uuidgen > /etc/machine-id

@@ -23,6 +23,23 @@ case $i in
 esac
 done
 
+# Ensure appimagetool is in the PATH
+if ! command -v appimagetool &> /dev/null
+then
+    echo "appimagetool could not be found, attempting to install it..."
+    wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+        && chmod +x appimagetool-x86_64.AppImage \
+        && sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+
+    if ! command -v appimagetool &> /dev/null
+    then
+        echo "Failed to install appimagetool. Please install it manually."
+        exit 1
+    fi
+else
+    echo "appimagetool is already installed."
+fi
+
 $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
   --output appimage
 
@@ -35,5 +52,8 @@ ML_VERSION=${strarr[1]} #get the meshlab version from the string
 # get running architecture
 ARCH=$(uname -m)
 
-mkdir $PACKAGES_PATH
+# Ensure the packages path exists
+mkdir -p $PACKAGES_PATH
+
+# Move the AppImage to the packages directory
 mv MeshLab-*.AppImage $PACKAGES_PATH/MeshLab$ML_VERSION-linux_$ARCH.AppImage
