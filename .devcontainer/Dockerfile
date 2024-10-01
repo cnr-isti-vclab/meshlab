@@ -11,6 +11,7 @@ ENV LD_LIBRARY_PATH=/opt/qt/${QT_VERSION}/gcc_64/lib/
 ENV QT_PLUGIN_PATH=/opt/qt/${QT_VERSION}/gcc_64/plugins/
 ENV QML_IMPORT_PATH=/opt/qt/${QT_VERSION}/gcc_64/qml/
 ENV QML2_IMPORT_PATH=/opt/qt/${QT_VERSION}/gcc_64/qml/
+ENV LANG=C.UTF-8
 
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     build-essential \
