@@ -653,6 +653,8 @@ void LayerDialog::updateLog(GLLogStream &log)
 	QString warningColor = this->palette().color(QPalette::HighlightedText).name();
 	QString presystemColor = this->palette().color(QPalette::HighlightedText).name();
 	QString prefilterColor = this->palette().color(QPalette::Text).name();
+	if(prefilterColor==presystemColor) presystemColor = "grey";
+	if(prefilterColor==warningColor) warningColor = "red";
 #else
 	QString warningColor = "red";
 	QString presystemColor = "grey";
@@ -660,7 +662,7 @@ void LayerDialog::updateLog(GLLogStream &log)
 #endif
 	QString preWarn    = "<font face=\"courier\" size=3 color=\"" + warningColor +"\"> Warning: " ;
 	QString preSystem  = "<font face=\"courier\" size=2 color=\"" + presystemColor +"\">" ;
-	QString preFilter  = "<font face=\"courier\" size=2 color=\"" + prefilterColor + "\">" ;
+	QString preFilter  = "<font face=\"courier\" size=2 color=\"" + prefilterColor + "\"> &nbsp;&nbsp;" ;
 
 	QString post   = "</font>";
 	QString logText;
@@ -672,9 +674,10 @@ void LayerDialog::updateLog(GLLogStream &log)
 			logText = preWarn + logText + post;
 		if(logElem.first == GLLogStream::FILTER)
 			logText = preFilter + logText + post;
-		logText += "<BR>";
+		// logText += "<BR>";
 	}
-	ui->logPlainTextEdit->appendHtml(logText);
+	if(!logText.isEmpty())
+		ui->logPlainTextEdit->appendHtml(logText);
 	log.clear();
 }
 
