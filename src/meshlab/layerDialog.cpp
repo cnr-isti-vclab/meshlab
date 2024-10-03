@@ -1056,7 +1056,7 @@ void LayerDialog::pauseAnim()
 {
 	animTimer->stop();
 	ui->animPlay->setChecked(false);
-	ui->animPlay->setText(tr(">"));
+	ui->animPlay->setText(tr("▶️"));
 	ui->animPlay->setToolTip(tr("Resume animation"));
 }
 
