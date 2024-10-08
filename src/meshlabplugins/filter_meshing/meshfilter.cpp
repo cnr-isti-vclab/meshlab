@@ -1067,6 +1067,9 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 		tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
+		
+		// Remove faux edges that are ignored by the isotropic remeshing (it supports only triangles)
+		tri::UpdateFlags<CMeshO>::FaceClearF(m.cm);
 
 		m.updateBoxAndNormals();
 
