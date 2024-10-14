@@ -35,6 +35,7 @@
 #include <vcg/complex/algorithms/pointcloud_normal.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/complex/algorithms/refine_doosabin.h>
+#include <vcg/complex/algorithms/refine_catmullclark.h>
 #include <vcg/space/fitting3.h>
 #include <wrap/gl/glu_tessellator_cap.h>
 #include "quadric_simp.h"
@@ -358,11 +359,11 @@ QString ExtraMeshFilterPlugin::filterInfo(ActionIDType filterID) const
 	case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant refinement method and it works for every triangle and has rules for extraordinary vertices.<br>");
 	case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated refinement method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
 	case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is split on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
-	case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. "
+	case FP_REFINE_CATMULL                     : return tr("Apply a number of iteration of the classical Catmull-Clark Subdivision Surfaces. "
 			                                               "If the mesh is triangle based (no <a href='https://stackoverflow.com/questions/59392193'>faux edges</a>) it generates a quad mesh, otherwise it honores it the faux-edge bits");
 	case FP_REFINE_DOOSABIN                     : return tr("Apply the DooSabin Subdivision Surfaces. It is a Dual approximating refinement scheme that creates a new face for each vertex, edge and face. On a pure quad mesh it will add non quad face for each extraordinarhy vertex in the mesh (e.g. in a cube it will add a triangular face for each corner. On the other hand after a refinement step all the vertices will have degree 4.");
 	case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
-			                                               "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
+			                                               "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces, and applying two step of this procedure generates the same connectivity of the Catmull-Clark subdivision approach."
 			                                               "(it adds only a single vertex for each triangle instead of four)."
 			                                               "<br> See: <br>"
 			                                               "<b>4-8 Subdivision</b>"
@@ -534,6 +535,10 @@ RichParameterList ExtraMeshFilterPlugin::initParameterList(const QAction * actio
 		break;
 		
 	case FP_REFINE_DOOSABIN:
+		parlst.addParam(RichInt("Iterations", 2, "Iterations", "Number of times the model is subdivided."));
+		break;
+		
+	case FP_REFINE_CATMULL:
 		parlst.addParam(RichInt("Iterations", 2, "Iterations", "Number of times the model is subdivided."));
 		break;
 		
@@ -1661,17 +1666,19 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 
 	case FP_REFINE_CATMULL :
 	{
-		if (!vcg::tri::BitQuadCreation<CMeshO>::IsTriQuadOnly(m.cm))
-		{
-			throw MLException("To be applied filter <i>" + filter->text() + "</i> requires a mesh with only triangular and/or quad faces.");
-		}
-		// in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
-		m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO);
-		tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
-		tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
-		tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(m.cm);
-		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-		m.updateDataMask(MeshModel::MM_POLYGONAL);
+		PMesh baseIn, refinedOut;
+		int iteration = par.getInt("Iterations");
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);		
+		tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(baseIn,m.cm);
+		tri::Clean<PMesh>::RemoveUnreferencedVertex(baseIn);
+		tri::Allocator<PMesh>::CompactEveryVector(baseIn);
+		tri::CatmullClark<PMesh>::Refine(baseIn, refinedOut,iteration);
+		m.cm.Clear();
+		tri::PolygonSupport<CMeshO,PMesh>::ImportFromPolyMesh(m.cm,refinedOut);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		tri::UpdateNormal<CMeshO>::PerBitPolygonFaceNormalized(m.cm);
+		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 	} break;
 		
 	case FP_REFINE_DOOSABIN :
