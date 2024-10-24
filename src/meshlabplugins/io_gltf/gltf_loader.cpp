@@ -430,6 +430,7 @@ void loadMeshPrimitive(
 	res = loadAttribute(m, ivp, model, p, COLOR_0);
 	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
 	}
 	progress.increment();
 	if (cb)
@@ -437,6 +438,7 @@ void loadMeshPrimitive(
 	res = loadAttribute(m, ivp, model, p, TEXCOORD_0, textureImg);
 	if (res) {
 		mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
 	}
 	progress.increment();
 
