@@ -1684,7 +1684,12 @@ std::map<std::string, QVariant> ExtraMeshFilterPlugin::applyFilter(
 	case FP_REFINE_DOOSABIN :
 	{
 		PMesh baseIn, refinedOut;
-		m.updateDataMask(MeshModel::MM_FACEFACETOPO);		
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		if(!tri::Clean<CMeshO>::IsFaceFauxConsistent(m.cm))
+		{
+			throw MLException("Mesh has inconsistent Faux Edge tagging.");
+		}
+		
 		tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(baseIn,m.cm);
 		tri::Clean<PMesh>::RemoveUnreferencedVertex(baseIn);
 		tri::Allocator<PMesh>::CompactEveryVector(baseIn);
