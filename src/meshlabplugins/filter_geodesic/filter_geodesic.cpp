@@ -187,7 +187,7 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
 		bool ret = tri::Geodesic<CMeshO>::DistanceFromBorder(m.cm);
 
 		// Cleaning Quality value of the unreferenced vertices
-		// Unreached vertices has a quality that is maxfloat
+		// Unreached vertices have a quality that is maxfloat
 		int unreachedCnt=0;
 		Scalarm unreached  = std::numeric_limits<Scalarm>::max();
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
@@ -196,7 +196,7 @@ std::map<std::string, QVariant> FilterGeodesic::applyFilter(const QAction *filte
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices or isolated closed connected components",unreachedCnt);
 
 		if(!ret) log("Mesh Has no borders. No geodesic distance computed");
 		else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
