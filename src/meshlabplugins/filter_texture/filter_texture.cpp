@@ -111,7 +111,7 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 	case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
-	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else the filter will fail with no further actions.");
+	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else the filter will fail with no further actions. If specified it can create and associate a dummy texture with a specified grid or checkboard pattern.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture color, vertex color or normal from one mesh the texture of another mesh. This may be useful to restore detail lost in simplification, or resample a texture in a different parametrization.");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from a texture (same mesh or another mesh).");
@@ -245,6 +245,10 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 	case FP_SET_TEXTURE :
 		parlst.addParam(RichFileOpen("textName", "", QStringList{"*.png", "*.jpg", "*.jpeg", "*.dds"},"Texture file", "Sets the given input image as unique texture of the mesh."));
 		parlst.addParam(RichBool("use_dummy_texture", false, "Use dummy texture", "If checked, the filter will set a dummy texture instead of loading an image. The 'Texture File' parameter will be ignored."));
+		parlst.addParam(RichInt("dummy_img_size", 512, "Dummy sixe", "Size in pixel of the square dummy texture."));
+		parlst.addParam(RichInt("dummy_check_size", 8, "Check size", "Size in pixel of the checkerboard of the dummy texture."));
+		parlst.addParam(RichEnum("dummy_type", 0, QStringList("Checkboard")  << "Grid", "Dummy Texture Type",
+								 "Choose what kind of dummy texture you want, a grid with lines or a checkboard"));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
@@ -674,6 +678,7 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 	case FP_SET_TEXTURE : {
 		// Get parameters
 		bool setDummy = par.getBool("use_dummy_texture");
+		bool gridFlag = par.getEnum("dummy_type")==0;
 		if (!setDummy) {
 			QString textName = par.getOpenFileName("textName");
 
@@ -686,7 +691,10 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			m.addTexture(finfo.fileName().toStdString(), textFile);
 		}
 		else {
-			QImage dummy = meshlab::getDummyTexture();
+			int imgSize = par.getInt("dummy_img_size");
+			int checkSize = par.getInt("dummy_check_size");
+			
+			QImage dummy = meshlab::getDummyTexture(imgSize, checkSize,gridFlag);
 			m.clearTextures();
 			m.addTexture("dummy_texture", dummy);
 		}
