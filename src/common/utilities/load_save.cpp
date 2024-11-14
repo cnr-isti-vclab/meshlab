@@ -333,9 +333,37 @@ QImage loadImage(const QString& filename, GLLogStream* log, vcg::CallBackPos* cb
 	}
 }
 
-QImage getDummyTexture()
+QImage getDummyTexture(int imageSize, int checkSize, bool gridFlag)
 {
-	return QImage(":/resources/images/dummy.png");
+	QImage image(imageSize, imageSize, QImage::Format_RGB32);
+	if(gridFlag)
+	{
+	for (int y = 0; y < imageSize; ++y) {
+		for (int x = 0; x < imageSize; ++x) {
+			if ( ((x/checkSize) %2 ) ==  ((y/checkSize) % 2)) {
+				image.setPixel(x, y, 0xFFFFFF);
+			} else {
+				image.setPixel(x, y, 0x808080);
+			}
+		}
+	}
+	}
+	else
+	{
+		for (int y = 0; y < imageSize; ++y) {
+			for (int x = 0; x < imageSize; ++x) {
+				if ( (x%checkSize) == 0 || (y%checkSize) == 0) 
+					image.setPixel(x, y, 0xFFFFFF);
+				else 
+					image.setPixel(x, y, 0x808080);				
+			}
+		}		
+	}
+		   // Save the image to a file.
+	image.save("checkerboard.png");
+	
+	return image;
+	// QImage(":/resources/images/dummy.png");
 }
 
 void saveImage(
