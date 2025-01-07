@@ -227,6 +227,7 @@ public:
 	TransferColorSampler(CMeshO &_srcMesh, std::vector <QImage> &_trgImgs, std::vector <QImage> *_srcImgs, float upperBound)
 		: trgImgs(_trgImgs), srcImgs(_srcImgs), dist_upper_bound(upperBound)
     {
+        srcMesh=&_srcMesh;
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);
         fromTexture = true;

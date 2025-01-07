@@ -986,6 +986,7 @@ void FilterTexturePlugin::transferToTexture(
 		for (srcTexInd = 0; srcTexInd < numSrcTex; srcTexInd++)
 		{
 			srcTextureFileNames[srcTexInd] = srcMesh->cm.textures[srcTexInd].c_str();
+			srcImgs[srcTexInd] = srcMesh->getTexture(srcMesh->cm.textures[srcTexInd]);
 		}
 	}
 
