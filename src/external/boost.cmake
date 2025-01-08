@@ -15,12 +15,12 @@ if(MESHLAB_ALLOW_SYSTEM_BOOST AND TARGET Boost::boost)
 		target_link_libraries(external-boost INTERFACE Boost::thread)
 	endif()
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_BOOST)
-	set(BOOST_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/boost_1_75_0")
+    set(BOOST_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/boost_1_87_0")
 	set(BOOST_CHECK "${BOOST_DIR}/boost/version.hpp")
 
 	if (NOT EXISTS ${BOOST_CHECK})
-		set(BOOST_LINK https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.zip)
-		set(BOOST_MD5 d3b276f6d22246171f93282910a1d583)
+        set(BOOST_LINK https://archives.boost.io/release/1.87.0/source/boost_1_87_0.zip)
+        set(BOOST_MD5 78b0a6c31fc0cc78060455b6df38cf4a)
 		download_and_unzip(
 			NAME "Boost"
 			MD5 ${BOOST_MD5}
