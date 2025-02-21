@@ -74,8 +74,8 @@ Please, when using this tool, cite the references listed in the official web pag
 
 ```
 @software{meshlab,
-  author       = {Paolo Cignoni, Alessandro Muntoni, Guido Ranzuglia, Marco Callieri},
-  title        = {{MeshLab}},
+  author       = {Cignoni, Paolo and Muntoni, Alessandro and Ranzuglia, Guido and Callieri, Marco},
+  title        = {MeshLab},
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.5114037}
 }
