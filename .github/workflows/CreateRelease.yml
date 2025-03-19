@@ -45,7 +45,7 @@ jobs:
       uses: ./.github/actions/0_setup
       with:
         qt-version: ${{env.QT_VERSION}}
-        use-jurpel-qt-action: ${{matrix.os != 'macos-latest'}}
+        use-jurpel-qt-action: ${{matrix.os != 'macos-latest' && matrix.os != 'ubuntu-22.04-arm'}}
     - name: Setup env variables
       id: envs
       shell: bash
