@@ -1,5 +1,5 @@
 #!/bin/bash
-# this is a script shell sets up an ubuntu (18.04, 20.04 and 22.04) environment where
+# this is a script shell sets up an ubuntu (22.04) environment where
 # MeshLab can be compiled.
 #
 # Run this script if you never installed any of the MeshLab dependencies.
@@ -34,8 +34,8 @@ sudo apt-get update
 echo "=== installing mesa packages..."
 sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
 
-echo "=== installing cmake, patchelf, gmp, mpfr and xcerces-c..."
-sudo apt-get install -y cmake ninja-build patchelf libgmp-dev libmpfr-dev libxerces-c-dev libtbb-dev
+echo "=== installing cmake, patchelf, fuse, gmp, mpfr and xcerces-c..."
+sudo apt-get install -y cmake ninja-build patchelf libfuse2 libgmp-dev libmpfr-dev libxerces-c-dev libtbb-dev
 
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
