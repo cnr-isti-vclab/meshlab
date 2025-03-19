@@ -97,6 +97,10 @@ jobs:
     needs: [meshlab_build]
     runs-on: ubuntu-latest
     steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libopengl0
 
     #Download Linux Packages
     - name: Download Linux x86_64 ZIP
