@@ -173,9 +173,9 @@ jobs:
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.tar.gz *
         cd ../meshlab_linux_portable_double_x86_64
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz *
-        cd ../meshlab_linux_portable_aaarch64
+        cd ../meshlab_linux_portable_aarch64
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux_aarch64.tar.gz *
-        cd ../meshlab_linux_portable_double_aaarch64
+        cd ../meshlab_linux_portable_double_aarch64
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux_aarch64.tar.gz *
         cd ..
 
