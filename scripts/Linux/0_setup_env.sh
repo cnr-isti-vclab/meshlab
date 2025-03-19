@@ -39,7 +39,7 @@ sudo apt-get install -y cmake ninja-build patchelf libgmp-dev libmpfr-dev libxer
 
 if [ "$DONT_INSTALL_QT" = false ] ; then
     echo "=== installing qt packages..."
-    sudo apt-get install -y qt5-default qttools5-dev-tools qtdeclarative5-dev
+    sudo apt-get install -y qtbase5-dev qt5-qmake
 else
     echo "=== jumping installation of qt packages..."
 fi
