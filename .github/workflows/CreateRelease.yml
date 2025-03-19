@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'macos-13', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-22.04', 'ubuntu-22.04-arm', 'macos-13', 'macos-latest', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
     - uses: actions/checkout@v4
@@ -99,32 +99,56 @@ jobs:
     steps:
 
     #Download Linux Packages
-    - name: Download Linux ZIP
+    - name: Download Linux x86_64 ZIP
       uses: actions/download-artifact@v4
       with:
         name: MeshLab_Linux_portable_x86_64
         path: meshlab_linux_portable_x86_64
-    - name: Download Linux ZIP-d
+    - name: Download Linux x86_64 ZIP-d
       uses: actions/download-artifact@v4
       with:
         name: MeshLab_Linux_portable_double_x86_64
         path: meshlab_linux_portable_double_x86_64
-    - name: Download Linux AppImage
+    - name: Download Linux x86_64 AppImage
       uses: actions/download-artifact@v4
       with:
         name: MeshLab_Linux_packages_x86_64
         path: meshlab_linux_appimage_x86_64
-    - name: Download Linux AppImage-d
+    - name: Download Linux x86_64 AppImage-d
       uses: actions/download-artifact@v4
       with:
         name: MeshLab_Linux_packages_double_x86_64
         path: meshlab_linux_appimage_double_x86_64
+    - name: Download Linux aarch64 ZIP
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_Linux_portable_aarch64
+        path: meshlab_linux_portable_aarch64
+    - name: Download Linux aarch64 ZIP-d
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_Linux_portable_double_aarch64
+        path: meshlab_linux_portable_double_aarch64
+    - name: Download Linux aarch64 AppImage
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_Linux_packages_aarch64
+        path: meshlab_linux_appimage_aarch64
+    - name: Download Linux aarch64 AppImage-d
+      uses: actions/download-artifact@v4
+      with:
+        name: MeshLab_Linux_packages_double_aarch64
+        path: meshlab_linux_appimage_double_aarch64
     - name: Change Permissions
       run: |
         chmod +x meshlab_linux_portable_x86_64/usr/bin/meshlab
         chmod +x meshlab_linux_portable_x86_64/AppRun
         chmod +x meshlab_linux_portable_double_x86_64/usr/bin/meshlab
         chmod +x meshlab_linux_portable_double_x86_64/AppRun
+        chmod +x meshlab_linux_portable_aarch64/usr/bin/meshlab
+        chmod +x meshlab_linux_portable_aarch64/AppRun
+        chmod +x meshlab_linux_portable_double_aarch64/usr/bin/meshlab
+        chmod +x meshlab_linux_portable_double_aarch64/AppRun
     - name: Setup env variables
       id: envs
       shell: bash
@@ -145,6 +169,10 @@ jobs:
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.tar.gz *
         cd ../meshlab_linux_portable_double_x86_64
         tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz *
+        cd ../meshlab_linux_portable_aaarch64
+        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version}}-linux_aarch64.tar.gz *
+        cd ../meshlab_linux_portable_double_aaarch64
+        tar -cvzf ../MeshLab${{steps.envs.outputs.ml_version_d}}-linux_aarch64.tar.gz *
         cd ..
 
     #Download MacOS Packages
@@ -210,6 +238,10 @@ jobs:
           MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz
           meshlab_linux_appimage_x86_64/MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.AppImage
           meshlab_linux_appimage_double_x86_64/MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.AppImage
+          MeshLab${{steps.envs.outputs.ml_version}}-linux_aarch64.tar.gz
+          MeshLab${{steps.envs.outputs.ml_version_d}}-linux_aarch64.tar.gz
+          meshlab_linux_appimage_aarch64/MeshLab${{steps.envs.outputs.ml_version}}-linux_aarch64.AppImage
+          meshlab_linux_appimage_double_aarch64/MeshLab${{steps.envs.outputs.ml_version_d}}-linux_aarch64.AppImage
           meshlab_macos_dmg_x86_64/MeshLab${{steps.envs.outputs.ml_version}}-macos_x86_64.dmg
           meshlab_macos_dmg_double_x86_64/MeshLab${{steps.envs.outputs.ml_version_d}}-macos_x86_64.dmg
           meshlab_macos_dmg_arm64/MeshLab${{steps.envs.outputs.ml_version}}-macos_arm64.dmg
