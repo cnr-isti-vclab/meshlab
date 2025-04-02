@@ -40,7 +40,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_QHULL)
 		message(STATUS "- qhull - using downloaded source")
 
 		set(MESSAGE_QUIET ON)
+		set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 		add_subdirectory(${QHULL_DIR} EXCLUDE_FROM_ALL)
+		unset(CMAKE_POLICY_VERSION_MINIMUM)
 		unset(MESSAGE_QUIET)
 
 		add_library(external-qhull INTERFACE)
