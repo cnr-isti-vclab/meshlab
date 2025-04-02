@@ -24,17 +24,19 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF "Allow download and use of lib3MF source" ON)
 
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
-  set(LIB3MF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3mf-2.3.2)
+  set(LIB3MF_VERSION "2.4.1")
+
+  set(LIB3MF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3mf-${LIB3MF_VERSION})
   set(LIB3MF_CHECK ${LIB3MF_DIR}/CMakeLists.txt) 
 
   if(NOT EXISTS ${LIB3MF_CHECK})
-    set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/releases/download/v2.3.2/lib3mf-2.3.2-source-with-submodules.zip)
-    set(LIB3MF_MD5 e9f3f40de2bd58c3f9109d657c86f3a8)
+    set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/releases/download/v${LIB3MF_VERSION}/lib3mf-${LIB3MF_VERSION}-source-with-submodules.zip)
+    set(LIB3MF_MD5 78109504b03157998467c4c69c27ee7e)
     download_and_unzip(
       NAME "Lib3MF"
       MD5  ${LIB3MF_MD5}
       LINK ${LIB3MF_LINK}
-      DIR  ${MESHLAB_EXTERNAL_DOWNLOAD_DIR})
+      DIR  ${LIB3MF_DIR})
     if(NOT download_and_unzip_SUCCESS)
       message(STATUS "- Lib3MF - download failed")
     endif()
@@ -44,7 +46,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
     message(STATUS "- Lib3MF - Using downloaded Lib3MF sources")
     set(MESSAGE_QUIET ON)
     set(LIB3MF_TESTS OFF)
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
     add_subdirectory(${LIB3MF_DIR} EXCLUDE_FROM_ALL)
+    unset(CMAKE_POLICY_VERSION_MINIMUM)
 
     # Well, this is extremely ugly
     # But due to some bug in lib3mf CMake function `generate_product_version`,
