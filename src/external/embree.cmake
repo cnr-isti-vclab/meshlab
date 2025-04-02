@@ -6,7 +6,7 @@ option(MESHLAB_ALLOW_DOWNLOAD_DLL_EMBREE "Allow download and use of embree dll (
 option(MESHLAB_ALLOW_SYSTEM_EMBREE "Allow use of system-provided embree" ON)
 
 set(EMBREE_MAJOR 4)
-set(EMBREE_MINOR 3.0)
+set(EMBREE_MINOR 3.3)
 set(EMBREE_VER "${EMBREE_MAJOR}.${EMBREE_MINOR}")
 
 # looking for embree for the filter_embree
