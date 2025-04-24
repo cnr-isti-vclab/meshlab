@@ -14,7 +14,7 @@ Note for Windows: scripts are written in bash, therefore they should be run in a
 
 See in each platform subfolder for details and other platform-dependent requirements:
 - [Linux](https://github.com/cnr-isti-vclab/meshlab/tree/main/scripts/Linux)
-- [MaxOS](https://github.com/cnr-isti-vclab/meshlab/tree/main/scripts/macOS)
+- [MacOS](https://github.com/cnr-isti-vclab/meshlab/tree/main/scripts/macOS)
 - [Windows](https://github.com/cnr-isti-vclab/meshlab/tree/main/scripts/Windows)
 
 ## `0_setup_env.sh`
