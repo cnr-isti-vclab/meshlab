@@ -255,6 +255,8 @@ CMeshO meshlab::meshFromMatrices(
 		if (!hasVNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
 		}
+
+        vcg::tri::UpdateBounding<CMeshO>::Box(m);
 	}
 	else {
 		throw MLException("Error while creating mesh: Vertex matrix is empty.");
