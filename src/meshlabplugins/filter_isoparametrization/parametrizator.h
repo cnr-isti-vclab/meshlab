@@ -599,6 +599,8 @@ private:
     ///set the best value considering the ratio value
     bool SetBestStatus(bool test_interpolation)
     {
+        if (ParaStack.size() == 0)
+            return false;
         std::sort(ParaStack.begin(),ParaStack.end());
         int indexmin=0;
         bool isOK_interp;

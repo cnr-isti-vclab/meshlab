@@ -31,8 +31,10 @@ then
     export QMAKE=$QT_DIR/bin/qmake
 fi
 
+ARCH=$(uname -m)
+
 # Make sure that deploy succeeds before we start deleting files
-if $RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH --plugin qt; then
+if $RESOURCES_PATH/linux/$ARCH/linuxdeploy --appdir=$INSTALL_PATH --plugin qt; then
   # after deploy, all required libraries are placed into usr/lib, therefore we can remove the ones in
   # usr/lib/meshlab (except for the ones that are loaded at runtime)
   cd $INSTALL_PATH/usr/lib/meshlab

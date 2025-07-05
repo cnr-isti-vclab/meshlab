@@ -40,7 +40,8 @@ else
     echo "appimagetool is already installed."
 fi
 
-$RESOURCES_PATH/linux/linuxdeploy --appdir=$INSTALL_PATH \
+ARCH=$(uname -m)
+$RESOURCES_PATH/linux/$ARCH/linuxdeploy --appdir=$INSTALL_PATH \
   --output appimage
 
 #get version
@@ -49,11 +50,9 @@ STR_VERSION=$($INSTALL_PATH/AppRun --version)
 read -a strarr <<< "$STR_VERSION"
 ML_VERSION=${strarr[1]} #get the meshlab version from the string
 
-# get running architecture
-ARCH=$(uname -m)
-
 # Ensure the packages path exists
 mkdir -p $PACKAGES_PATH
 
 # Move the AppImage to the packages directory
+mkdir -p $PACKAGES_PATH
 mv MeshLab-*.AppImage $PACKAGES_PATH/MeshLab$ML_VERSION-linux_$ARCH.AppImage

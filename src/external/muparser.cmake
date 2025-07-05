@@ -12,14 +12,15 @@ if(MESHLAB_ALLOW_SYSTEM_MUPARSER AND TARGET muparser::muparser)
 	add_library(external-muparser INTERFACE)
 	target_link_libraries(external-muparser INTERFACE muparser::muparser)
 elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_MUPARSER)
-	set(MUPARSER_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/muparser-2.3.3-1")
+	set(MUPARSER_VERSION "2.3.5")
+	set(MUPARSER_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/muparser-${MUPARSER_VERSION}")
 	set(MUPARSER_CHECK "${MUPARSER_DIR}/src/muParser.cpp")
 
 	if (NOT EXISTS ${MUPARSER_CHECK})
 		set(MUPARSER_LINK
-			https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.3-1.zip
-			https://www.meshlab.net/data/libs/muparser-2.3.3-1.zip)
-		set(MUPARSER_MD5 8cf887ce460a405b8d8b966e0d5c94e3)
+			https://github.com/beltoforion/muparser/archive/refs/tags/v${MUPARSER_VERSION}.zip
+			https://www.meshlab.net/data/libs/muparser-${MUPARSER_VERSION}.zip)
+		set(MUPARSER_MD5 274d3e3c8b9a48b94f3e281820a00c57)
 		download_and_unzip(
 			NAME "muparser"
 			LINK ${MUPARSER_LINK}

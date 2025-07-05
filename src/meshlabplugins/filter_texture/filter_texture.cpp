@@ -504,12 +504,17 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 			}
 			
 			// Creates buckets containing each halfening level triangles (a histogram)
-			int    buckSize = (int)ceil(log_2(maxArea/minArea) + DBL_EPSILON);
+			// Using the logarithm law
+			//       log_2(maxArea / minArea)
+			//     = log_2(maxArea) - log_2(minArea)
+			// but the latter does not overflow the division if `minArea = DBL_MIN`
+			// as set above for `area == 0`.
+			int    buckSize = (int)ceil(log_2(maxArea) - log_2(minArea) + DBL_EPSILON);
 			std::vector<std::vector<uint> > buckets(buckSize);
 			for (uint i=0; i<areas.size(); ++i)
 				if (areas[i]>=0)
 				{
-					int slot = (int)ceil(log_2(maxArea/areas[i]) + DBL_EPSILON) - 1;
+					int slot = (int)ceil(log_2(maxArea) - log_2(areas[i]) + DBL_EPSILON) - 1;
 					assert(slot < buckSize && slot >= 0);
 					buckets[slot].push_back(i);
 				}
@@ -981,6 +986,7 @@ void FilterTexturePlugin::transferToTexture(
 		for (srcTexInd = 0; srcTexInd < numSrcTex; srcTexInd++)
 		{
 			srcTextureFileNames[srcTexInd] = srcMesh->cm.textures[srcTexInd].c_str();
+			srcImgs[srcTexInd] = srcMesh->getTexture(srcMesh->cm.textures[srcTexInd]);
 		}
 	}
 

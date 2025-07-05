@@ -41,7 +41,8 @@ class PVertex :
 			vertex::Normal3f,
 			vertex::Qualityf,
 			vertex::Color4b,
-			vertex::BitFlags>
+			vertex::BitFlags,
+			vertex::TexCoord2f>
 {
 };
 class PEdge : public Edge<PUsedTypes, edge::VertexRef, edge::BitFlags>
@@ -254,6 +255,8 @@ CMeshO meshlab::meshFromMatrices(
 		if (!hasVNormals) {
 			vcg::tri::UpdateNormal<CMeshO>::PerVertex(m);
 		}
+
+        vcg::tri::UpdateBounding<CMeshO>::Box(m);
 	}
 	else {
 		throw MLException("Error while creating mesh: Vertex matrix is empty.");
@@ -330,6 +333,7 @@ CMeshO meshlab::polyMeshFromMatrices(
 			}
 			m.vert.EnableTexCoord();
 		}
+
 		PolyMesh::VertexIterator vi =
 			vcg::tri::Allocator<PolyMesh>::AddVertices(pm, vertices.rows());
 		for (unsigned int i = 0; i < vertices.rows(); ++i, ++vi) {
