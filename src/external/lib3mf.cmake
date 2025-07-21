@@ -30,7 +30,9 @@ if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
   set(LIB3MF_CHECK ${LIB3MF_DIR}/CMakeLists.txt) 
 
   if(NOT EXISTS ${LIB3MF_CHECK})
-    set(LIB3MF_LINK https://github.com/3MFConsortium/lib3mf/releases/download/v${LIB3MF_VERSION}/lib3mf-${LIB3MF_VERSION}-source-with-submodules.zip)
+    set(LIB3MF_LINK
+      https://github.com/3MFConsortium/lib3mf/releases/download/v${LIB3MF_VERSION}/lib3mf-${LIB3MF_VERSION}-source-with-submodules.zip
+      https://www.meshlab.net/data/libs/lib3mf-${LIB3MF_VERSION}-source-with-submodules.zip)
     set(LIB3MF_MD5 78109504b03157998467c4c69c27ee7e)
     download_and_unzip(
       NAME "Lib3MF"
