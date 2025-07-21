@@ -119,7 +119,7 @@ Lib3MFPlugin::Lib3MFPlugin()
 
 QString Lib3MFPlugin::pluginName() const
 {
-	return "3MF importer and exporter";
+    return "IO3MF";
 }
 
 std::list<FileFormat> Lib3MFPlugin::importFormats() const
