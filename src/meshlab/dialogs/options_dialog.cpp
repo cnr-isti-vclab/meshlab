@@ -31,30 +31,72 @@
 using namespace vcg;
 
 MeshLabOptionsDialog::MeshLabOptionsDialog(
-		RichParameterList& curparset,
-		const RichParameterList& defparset,
-		QWidget * parent) :
-	QDialog(parent),
-	currentParameterList(curparset),
-	defaultParameterList(defparset)
+	RichParameterList& curparset,
+	const RichParameterList& defparset,
+	QWidget * parent) :
+		QDialog(parent),
+		currentParameterList(curparset),
+		defaultParameterList(defparset)
 {
 	setModal(false);
-	closebut = new QPushButton("Close",this);
+	closebut = new QPushButton("Close", this);
 	QGridLayout* layout = new QGridLayout(parent);
 	setLayout(layout);
-	tw = new QTableWidget(currentParameterList.size(),2,this);
+	
+		   // Add to the window a filter/search widget with a lens icon
+	searchWidget = new QLineEdit(this);
+	QHBoxLayout *searchLayout = new QHBoxLayout;
+	QLabel *lensIcon = new QLabel(this);
+	lensIcon->setText(QString::fromUtf8("\U0001F50D")); // Unicode character for the lens icon
+	searchLayout->addWidget(lensIcon);
+	searchLayout->addWidget(searchWidget);
+	
+	tw = new QTableWidget(currentParameterList.size(), 3, this);
+	tw->setColumnHidden(2,true);	
 	updateSettings();
 	int totlen = tw->columnWidth(0) + tw->columnWidth(1) + this->frameSize().width();
 	setMinimumWidth(totlen);
-	layout->addWidget(tw,0,0,1,5);
-	layout->addWidget(closebut,1,4,1,1);
-	connect(tw, SIGNAL(itemDoubleClicked(QTableWidgetItem* )), this, SLOT(openSubDialog(QTableWidgetItem*)));
+	
+	layout->addLayout(searchLayout, 0, 0, 1, 5);
+	layout->addWidget(tw, 1, 0, 1, 5);
+	layout->addWidget(closebut, 2, 4, 1, 1);
+	
+	connect(tw, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(openSubDialog(QTableWidgetItem*)));
 	connect(closebut, SIGNAL(clicked()), this, SLOT(close()));
+	connect(searchWidget, &QLineEdit::textChanged, this, &MeshLabOptionsDialog::onSearchTextChanged);
+	
+		   // Set focus to the search widget when the dialog opens
+	searchWidget->setFocus();
+	
 	this->setWindowTitle(tr("Global Parameters Window"));
 }
-
 MeshLabOptionsDialog::~MeshLabOptionsDialog()
 {
+}
+
+
+void MeshLabOptionsDialog::onSearchTextChanged(const QString &text) {
+	if (text.length() > 2) {
+		filterTable(text);
+	} else {
+		// Show all rows if the text is 2 characters or less
+		for (int row = 0; row < tw->rowCount(); ++row) {
+			tw->setRowHidden(row, false);
+		}
+	}
+}
+void MeshLabOptionsDialog::filterTable(const QString &text) {
+	for (int row = 0; row < tw->rowCount(); ++row) {
+		bool match = false;
+		for (int col = 0; col < tw->columnCount(); ++col) {
+			QTableWidgetItem *item = tw->item(row, col);
+			if (item && item->text().contains(text, Qt::CaseInsensitive)) {
+				match = true;
+				break;
+			}
+		}
+		tw->setRowHidden(row, !match);
+	}
 }
 
 /**
@@ -79,6 +121,8 @@ void MeshLabOptionsDialog::updateSettings()
 	QStringList slst;
 	slst.push_back("Variable Name");
 	slst.push_back("Variable Value");
+	slst.push_back("Description");
+	
 	tw->setHorizontalHeaderLabels(slst);
 	tw->horizontalHeader()->setStretchLastSection(true);
 	tw->setShowGrid(true);
@@ -90,8 +134,12 @@ void MeshLabOptionsDialog::updateSettings()
 	for(const RichParameter& p : currentParameterList) {
 		QTableWidgetItem* item = new QTableWidgetItem(p.name());
 		item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
-
 		tw->setItem(ii,0,item);
+		
+		QTableWidgetItem* itemDesc = new QTableWidgetItem(p.toolTip());
+		itemDesc->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
+		tw->setItem(ii,2,itemDesc);
+		
 
 		QTableWidgetItem* twi = createQTableWidgetItemFromRichParameter(p);
 		twi->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled |Qt::ItemIsDropEnabled |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);

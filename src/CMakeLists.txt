@@ -123,6 +123,7 @@ if(NOT DEFINED MESHLAB_PLUGINS) # it may be already defined in parent directory
 	set(MESHLAB_PLUGINS
 		# IO plugins
 		meshlabplugins/io_3ds
+		meshlabplugins/io_3mf
 		meshlabplugins/io_base
 		meshlabplugins/io_bre
 		meshlabplugins/io_collada

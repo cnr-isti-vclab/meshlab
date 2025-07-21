@@ -52,17 +52,18 @@ signals:
 
 private slots:
 	void openSubDialog(QTableWidgetItem* itm);
-
+	void filterTable(const QString &text);
 	void updateSingleSetting(const RichParameter& rp);
-
+	void onSearchTextChanged(const QString &text);
 private:
 	void updateSettings();
 
 	RichParameterList& currentParameterList;
 	const RichParameterList& defaultParameterList;
 	QTableWidget* tw;
+	QPushButton* filterButton;
 	QPushButton* closebut;
-
+	QLineEdit* searchWidget;
 	static QTableWidgetItem* createQTableWidgetItemFromRichParameter(const RichParameter& pd);
 };
 

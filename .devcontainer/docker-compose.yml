@@ -16,9 +16,10 @@ services:
       # fuse is needed. If you don't plan to create the AppImage, you can remove the 
       # following lines
       - /lib/modules:/lib/modules
-    # flag --device /dev/fuse
+    # flag --device /dev/fuse --device /dev/dri (last one is needed for NVIDIA GPUs)
     devices:
       - /dev/fuse
+      - /dev/dri
     # flag --cap-add SYS_ADMIN
     cap_add:
       - SYS_ADMIN

@@ -43,6 +43,7 @@ FilterCreate::FilterCreate()
 		CR_RANDOM_SPHERE,
 		CR_ICOSAHEDRON,
 		CR_DODECAHEDRON,
+		CR_DODECAHEDRON_SYM,
 		CR_TETRAHEDRON,
 		CR_OCTAHEDRON,
 		CR_CONE,
@@ -69,6 +70,7 @@ QString FilterCreate::filterName(ActionIDType filterId) const
 	case CR_RANDOM_SPHERE: return QString("Points on a Sphere");
 	case CR_ICOSAHEDRON: return QString("Icosahedron");
 	case CR_DODECAHEDRON: return QString("Dodecahedron");
+	case CR_DODECAHEDRON_SYM: return QString("Dodecahedron (symmetric)");
 	case CR_OCTAHEDRON: return QString("Octahedron");
 	case CR_TETRAHEDRON: return QString("Tetrahedron");
 	case CR_CONE: return QString("Cone");
@@ -88,6 +90,7 @@ QString FilterCreate::pythonFilterName(ActionIDType f) const
 	case CR_RANDOM_SPHERE: return QString("create_sphere_points");
 	case CR_ICOSAHEDRON: return QString("create_icosahedron");
 	case CR_DODECAHEDRON: return QString("create_dodecahedron");
+	case CR_DODECAHEDRON_SYM: return QString("create_dodecahedron_sym");
 	case CR_OCTAHEDRON: return QString("create_octahedron");
 	case CR_TETRAHEDRON: return QString("create_tetrahedron");
 	case CR_CONE: return QString("create_cone");
@@ -108,7 +111,8 @@ QString FilterCreate::filterInfo(ActionIDType filterId) const
 	case CR_SPHERE_CAP: return QString("Create a Sphere Cap, or spherical dome, subtended by a cone of given angle");
 	case CR_RANDOM_SPHERE: return QString("Create a spherical point cloud, it can be random or regularly distributed.");
 	case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
-	case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
+	case CR_DODECAHEDRON: return QString("Create a Dodecahedron");
+	case CR_DODECAHEDRON_SYM: return QString("Create a Dodecahedron, but triangulated with an additional vertex in the middle of each face to preserve symmetry.");
 	case CR_OCTAHEDRON: return QString("Create an Octahedron");
 	case CR_TETRAHEDRON: return QString("Create a Tetrahedron");
 	case CR_CONE: return QString("Create a Cone");
@@ -217,6 +221,10 @@ std::map<std::string, QVariant> FilterCreate::applyFilter(const QAction *filter,
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Dodecahedron<CMeshO>(m->cm);
 		m->updateDataMask(MeshModel::MM_POLYGONAL);
+		break;
+	case CR_DODECAHEDRON_SYM:
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::DodecahedronSym<CMeshO>(m->cm);
 		break;
 	case CR_OCTAHEDRON:
 		m = md.addNewMesh("", this->filterName(ID(filter)));
@@ -565,6 +573,7 @@ FilterPlugin::FilterClass FilterCreate::getClass(const QAction *a) const
 	case CR_TETRAHEDRON:
 	case CR_ICOSAHEDRON:
 	case CR_DODECAHEDRON:
+	case CR_DODECAHEDRON_SYM:
 	case CR_SPHERE:
 	case CR_SPHERE_CAP:
 	case CR_ANNULUS:
@@ -592,6 +601,7 @@ QString FilterCreate::filterScriptFunctionName( ActionIDType filterID )
 	case CR_RANDOM_SPHERE: return QString("randomsphere");
 	case CR_ICOSAHEDRON: return QString("icosahedron");
 	case CR_DODECAHEDRON: return QString("dodecahedron");
+	case CR_DODECAHEDRON_SYM: return QString("dodecahedronsym");
 	case CR_OCTAHEDRON: return QString("octahedron");
 	case CR_TETRAHEDRON: return QString("tetrahedron");
 	case CR_CONE: return QString("cone");

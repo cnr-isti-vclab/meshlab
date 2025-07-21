@@ -475,7 +475,10 @@ QString FilterDocSampling::filterInfo(ActionIDType filterId) const
 		return QString(
 			"Create a new layer populated with a simplified version of the current point cloud. "
 			"The simplification is performed by subsampling the original point cloud using a "
-			"Poisson Disk strategy.");
+			"Poisson Disk strategy  using the algorithm described in:<br>"
+			"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular "
+			"Meshes'</b><br>"
+			" Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
 	case FP_POISSONDISK_SAMPLING:
 		return QString(
 			"Create a new layer populated with a point sampling of the current mesh;"

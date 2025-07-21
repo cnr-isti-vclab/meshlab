@@ -4,7 +4,7 @@
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57 "Allow download and use of libE57Format source" ON)
 
-set(LIBE57_VER 2.3.0)
+set(LIBE57_VER 3.1.1)
 
 if (TARGET XercesC::XercesC)
 	if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBE57)
@@ -15,7 +15,7 @@ if (TARGET XercesC::XercesC)
 			set(LIBE57_LINK
 				https://github.com/asmaloney/libE57Format/archive/refs/tags/v${LIBE57_VER}.zip
 				https://www.meshlab.net/data/libs/libE57Format-${LIBE57_VER}.zip)
-			set(LIBE57_MD5 958ada3883f9b60195f79bbab156f3e3)
+			set(LIBE57_MD5 1da204e43a2e2e1ca5d23deb77dd8b8e)
 			download_and_unzip(
 				NAME "LibE57"
 				MD5 ${LIBE57_MD5}

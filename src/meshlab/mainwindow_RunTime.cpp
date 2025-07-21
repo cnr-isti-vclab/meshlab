@@ -1098,7 +1098,7 @@ void MainWindow::executeFilter(
 		
 		// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 		
-		meshDoc()->Log.logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
+		meshDoc()->Log.logf(GLLogStream::SYSTEM,"Applied filter: %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
 		if (meshDoc()->mm() != NULL)
 			meshDoc()->mm()->setMeshModified();
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
@@ -2510,7 +2510,7 @@ void MainWindow::helpOnscreen()
 void MainWindow::helpOnline()
 {
 	checkForUpdates(false);
-	QDesktopServices::openUrl(QUrl("http://www.meshlab.net/#support"));
+	QDesktopServices::openUrl(QUrl("https://www.meshlab.net/#support"));
 }
 
 void MainWindow::showToolbarFile(){

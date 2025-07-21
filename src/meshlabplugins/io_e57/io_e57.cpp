@@ -257,7 +257,7 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     E57_WRAPPER(fileWriter.IsOpen(), "Error while opening E57 file for writing!");
 
     scanHeader.guid = QUuid::createUuid().toString(QUuid::WithBraces).toStdString();
-    scanHeader.pointsSize = static_cast<int64_t>(totalPoints);
+    scanHeader.pointCount = static_cast<int64_t>(totalPoints);
 
     e57::Translation translation;
     e57::Quaternion quaternion;
@@ -289,21 +289,21 @@ void E57IOPlugin::save(const QString& formatName, const QString& fileName, MeshM
     scanHeader.pointFields.cartesianZField = true;
 
     if ((mask & Mask::IOM_VERTNORMAL) != 0) {
-        scanHeader.pointFields.normalX = true;
-        scanHeader.pointFields.normalY = true;
-        scanHeader.pointFields.normalZ = true;
+        scanHeader.pointFields.normalXField = true;
+        scanHeader.pointFields.normalYField = true;
+        scanHeader.pointFields.normalZField = true;
     }
     if ((mask & Mask::IOM_VERTCOLOR) != 0) {
         scanHeader.pointFields.isColorInvalidField = false;
         scanHeader.pointFields.colorRedField = true;
         scanHeader.pointFields.colorGreenField = true;
         scanHeader.pointFields.colorBlueField = true;
-        scanHeader.colorLimits.colorRedMinimum = e57::E57_UINT8_MIN;
-        scanHeader.colorLimits.colorRedMaximum = e57::E57_UINT8_MAX;
-        scanHeader.colorLimits.colorGreenMinimum = e57::E57_UINT8_MIN;
-        scanHeader.colorLimits.colorGreenMaximum = e57::E57_UINT8_MAX;
-        scanHeader.colorLimits.colorBlueMinimum = e57::E57_UINT8_MIN;
-        scanHeader.colorLimits.colorBlueMaximum = e57::E57_UINT8_MAX;
+        scanHeader.colorLimits.colorRedMinimum = e57::UINT8_MIN;
+		scanHeader.colorLimits.colorRedMaximum = std::numeric_limits<uint8_t>::max();
+        scanHeader.colorLimits.colorGreenMinimum = e57::UINT8_MIN;
+        scanHeader.colorLimits.colorGreenMaximum = std::numeric_limits<uint8_t>::max();
+        scanHeader.colorLimits.colorBlueMinimum = e57::UINT8_MIN;
+        scanHeader.colorLimits.colorBlueMaximum = std::numeric_limits<uint8_t>::max();
     }
     if ((mask & Mask::IOM_VERTQUALITY) != 0) {
         float min = std::numeric_limits<float>::max();

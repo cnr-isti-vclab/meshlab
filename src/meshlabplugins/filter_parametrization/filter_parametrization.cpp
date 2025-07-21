@@ -199,7 +199,11 @@ std::map<std::string, QVariant> FilterParametrizationPlugin::applyFilter(
 		bc<<0,0,1,0;
 
 		// LSCM parametrization
-		igl::lscm(verts,faces,boundaryPoints,bc,V_uv);
+		bool ret=igl::lscm(verts,faces,boundaryPoints,bc,V_uv);
+		if(!ret)
+		{
+			throw MLException("Least Squares Conformal Maps Parametrization Failed");
+		}
 
 		unsigned int i = 0;
 		for (auto& v : md.mm()->cm.vert){

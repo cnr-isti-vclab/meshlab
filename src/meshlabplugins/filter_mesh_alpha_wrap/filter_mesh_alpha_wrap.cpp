@@ -99,12 +99,10 @@ QString FilterMeshAlphaWrap::pythonFilterName(ActionIDType f) const
 QString FilterMeshAlphaWrap::filterInfo(ActionIDType filterId) const
 {
 	QString description =
-		"This filter extecutes an Alpha Wrap based on the input mesh. <br>"
+		"This filter compute Alpha wrapping with an offset. <br>"
 		"The filter uses the original code provided in CGAL "
 		"<a href=\"https://doc.cgal.org/latest/Alpha_wrap_3/index.html#Chapter_3D_Alpha_wrapping\">3D Alpha Wrapping</a>.<br>"
 		"<br>"
-		"Alpha: this is the size of the 'ball', specified as the fraction of the length of the largest diagonal of the bounding box. So, if this value is 0.02 then the size of the ball is 2% of the largest diagonal. Note that the run-time and memory consumption will increase with a smaller ball size.<br><br>"
-		"Offset: the offset distance that is added to the surface, always larger than 0, as a fraction of the length of the largest diagonal. A value of 0.001 means that the surface will be offset by a thousandth of this length.<br><br>"
 		"The implementation is based on the following paper:<br>"
 		"Cédric Portaneri, Mael Rouxel-Labbé, Michael Hemmer, David Cohen-Steiner, Pierre Alliez, "
 		"<a href=\"https://inria.hal.science/hal-03688637\"><b>\"Alpha Wrapping with an Offset\"</b></a> (2022)<br><br>This plugin is contributed by Lex van der Sluijs at PTC.<br>";
@@ -126,7 +124,7 @@ FilterMeshAlphaWrap::FilterClass FilterMeshAlphaWrap::getClass(const QAction* a)
 	switch (ID(a)) {
 	case MESH_ALPHA_WRAP:
 		return FilterPlugin::FilterClass(
-			FilterPlugin::FilterClass(FilterPlugin::Layer + FilterPlugin::Remeshing));
+			FilterPlugin::FilterClass(FilterPlugin::Remeshing));
 	default: assert(0); return FilterPlugin::Generic;
 	}
 }
@@ -178,16 +176,20 @@ FilterMeshAlphaWrap::initParameterList(const QAction* action, const MeshDocument
 	switch (ID(action)) {
 	case MESH_ALPHA_WRAP:
 	{
-		parlst.addParam(RichFloat(
-			"Alpha fraction",
-			0.02,
-			tr("Alpha: the size of the ball (fraction)"),
-			tr("")));
-		parlst.addParam(RichFloat(
-			"Offset fraction",
-			0.001,
-			tr("Offset added to the surface (fraction)"),
-			tr("")));
+		parlst.addParam(RichPercentage(
+			"Alpha",
+			md.mm()->cm.bbox.Diag()*0.02,
+			0.0f,
+			md.mm()->cm.bbox.Diag(),
+			tr("Alpha"),
+			tr("The radius of the rolling ball. Note that for smaller radius computation time increases.")));
+		parlst.addParam(RichPercentage(
+			"Offset",
+			md.mm()->cm.bbox.Diag()*0.001,
+			0.0f,
+			md.mm()->cm.bbox.Diag(),			
+			tr("Offset"),
+			tr("The offset added to the surface. Note that this value should be larger than 0.0.")));
 	} break;
 	default: assert(0);
 	}
@@ -210,104 +212,62 @@ std::map<std::string, QVariant> FilterMeshAlphaWrap::applyFilter(
 	MeshDocument&            md,
 	unsigned int& /*postConditionMask*/,
 	vcg::CallBackPos*)
-{
-	float alpha_fraction = par.getFloat("Alpha fraction");
-	float offset_fraction = par.getFloat("Offset fraction");
-
-	CgalMesh inputMesh;
-	CgalMesh wrapResult;
-
-	// ------- initialize the CGAL input mesh based on the contents of the MeshDocument ----------
-	// 'cm' is 'current mesh' or 'compute mesh' ?
-	CMeshO& m = md.mm()->cm;
-
-	// note: coding guided from these pages:
-	// http://vcglib.net/platonic_8h_source.html to read from VCGlib mesh
-	// https://doc.cgal.org/latest/Surface_mesh/index.html#Chapter_3D_Surface_mesh to write to CGAL mesh
-
-	for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi){
-		vertex_descriptor vertex = inputMesh.add_vertex(K::Point_3((*vi).P().X(), (*vi).P().Y(), (*vi).P().Z()));
-	}
-
-	bool meshContainsQuads = false;
-	for (auto fi = m.face.begin(); fi != m.face.end(); ++fi)
-	{
-		vertex_descriptor u( (*fi).V(0)->Index() );
-		vertex_descriptor v( (*fi).V(1)->Index() );
-		vertex_descriptor w( (*fi).V(2)->Index() );
-
-		//qDebug() << "m.face (*fi).VN() " << (*fi).VN();
-		if ( (*fi).VN() == 4)
-		{
-			meshContainsQuads = true;
-			vertex_descriptor x( (*fi).V(3)->Index() );
-			face_descriptor face = inputMesh.add_face(u, v, w, x);
-		}
-		else
-			face_descriptor face = inputMesh.add_face(u, v, w);
-	}
-
-	CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(inputMesh);
-	const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-										 CGAL::square(bbox.ymax() - bbox.ymin()) +
-										 CGAL::square(bbox.zmax() - bbox.zmin()));
-
+{	
 	switch (ID(action)) {
 	case MESH_ALPHA_WRAP:
-
-		{
-		if(meshContainsQuads)
-		{
-			qDebug() << "Input mesh contains quads, triangulating first";
-			CGAL::Polygon_mesh_processing::triangulate_faces(inputMesh);
+	{
+		float alpha_fraction = par.getAbsPerc("Alpha");
+		float offset_fraction = par.getAbsPerc("Offset");
+		
+		CgalMesh inputMesh;
+		CgalMesh wrapResult;
+		
+			   // ------- initialize the CGAL input mesh based on the contents of the MeshDocument ----------
+		CMeshO& m = md.mm()->cm;
+		
+		// note: coding guided from these pages:
+		// http://vcglib.net/platonic_8h_source.html to read from VCGlib mesh
+		// https://doc.cgal.org/latest/Surface_mesh/index.html#Chapter_3D_Surface_mesh to write to CGAL mesh
+		
+		for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi){
+			vertex_descriptor vertex = inputMesh.add_vertex(K::Point_3((*vi).P().X(), (*vi).P().Y(), (*vi).P().Z()));
 		}
+		
+		for (auto fi = m.face.begin(); fi != m.face.end(); ++fi)
+		{
+			vertex_descriptor u( (*fi).V(0)->Index() );
+			vertex_descriptor v( (*fi).V(1)->Index() );
+			vertex_descriptor w( (*fi).V(2)->Index() );
+			face_descriptor face = inputMesh.add_face(u, v, w);
+		}
+		
 
-		CGAL::alpha_wrap_3(inputMesh, diag_length * alpha_fraction, diag_length * offset_fraction, wrapResult);
+		CGAL::alpha_wrap_3(inputMesh, alpha_fraction, offset_fraction, wrapResult);
 
 		// making a nice label that has the used parameter doesn't work, since it will be interpreted
 		// as a file name and the UI will manipulate the string based on where the dots are.
 		// QString newName = QString::asprintf("Alpha Wrap a=%.4f, o=%.4f").arg(alpha_fraction, offset_fraction);
 		QString newName = "Alpha wrap";
-		MeshModel* mesh = md.addNewMesh("", newName, true);
+		MeshModel* result = md.addNewMesh("", newName, true);
 
-		EigenMatrixX3m   VR;
-		Eigen::MatrixX3i FR;
-
-
-		VR.resize(wrapResult.num_vertices(), Eigen::NoChange);
-		FR.resize(wrapResult.num_faces(), Eigen::NoChange);
-
-		// --------- copy results from wrap into Eigen matrices --------------
-		// 'rvi' = result vertex iterator, vi = vertex index
-		int vi = 0;
 		for(auto rvi = wrapResult.vertices().begin(); rvi != wrapResult.vertices().end(); ++rvi)
 		{
-			VR(vi, 0) = wrapResult.point(*rvi).x();
-			VR(vi, 1) = wrapResult.point(*rvi).y();
-			VR(vi, 2) = wrapResult.point(*rvi).z();
-			++vi;
+			vcg::tri::Allocator<CMeshO>::AddVertex(result->cm,Point3m(wrapResult.point(*rvi).x(),wrapResult.point(*rvi).y(),wrapResult.point(*rvi).z()));
 		}
 
-		int faceIndex = 0;
 		for(auto rfi = wrapResult.faces().begin(); rfi != wrapResult.faces().end(); ++rfi)
 		{
+			std::vector<int> faceVertices;
 			// qDebug() << "vertices around face " << *rfi;
 			CGAL::Vertex_around_face_iterator<CgalMesh> vbegin, vend;
-			int i = 0;
 			for(boost::tie(vbegin, vend) = vertices_around_face(wrapResult.halfedge( *rfi), wrapResult);   vbegin != vend;  ++vbegin)
 			{
-				// qDebug() << *vbegin << " vbegin->idx() " << vbegin->idx();
-				FR(faceIndex, i) = vbegin->idx();
-				++i;
-			}
-
-			++faceIndex;
+				faceVertices.push_back(vbegin->idx());
+			}			
+			vcg::tri::Allocator<CMeshO>::AddFace(result->cm,faceVertices[0],faceVertices[1],faceVertices[2]);
 		}
-
-
-		// ------------- then initialize the new mesh using these Eigen matrices ----------
-		mesh->cm        = meshlab::meshFromMatrices(VR, FR);
-	}
+		result->updateBoxAndNormals();
+		}
 	break;
 
 	default: wrongActionCalled(action);

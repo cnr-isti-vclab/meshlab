@@ -951,6 +951,7 @@ void GLArea::displayHelp()
         else assert(0);
 #ifdef Q_OS_MAC
         tableText.replace("Ctrl","Command");
+		tableText.replace("Command-H","Command-Shift-H");
 #endif
     }
     md()->Log.realTimeLog("Quick Help","",tableText);

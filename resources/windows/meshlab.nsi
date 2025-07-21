@@ -6,7 +6,7 @@
 !define PRODUCT_NAME "MeshLab"
 !define PRODUCT_VERSION "MESHLAB_VERSION"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - VCG - ISTI - CNR"
-!define PRODUCT_WEB_SITE "http://www.meshlab.net"
+!define PRODUCT_WEB_SITE "https://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -58,15 +58,25 @@ ShowUnInstDetails show
 Function .onInit
   ReadRegStr $0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   ${If} $0 != "" ;2020.0x...
-    MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
-	StrCpy $8 '"$0"'
-	!insertmacro ExecWaitJob r8
+    ${IfNot} ${Silent}
+      MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
+    ${EndIf}
+    StrCpy $8 '"$0"'
+    ${If} ${Silent}
+      StrCpy $8 "$8 /S"
+    ${EndIf}
+    !insertmacro ExecWaitJob r8
   ${Else}
     ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MeshLab_64b" "UninstallString"
     ${If} $0 != "" ;2016.12
-	  MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
-   	  StrCpy $8 '"$0"'
-	  !insertmacro ExecWaitJob r8
+      ${IfNot} ${Silent}
+        MessageBox MB_OK "Please first uninstall old MeshLab version. Starting uninstaller now..."
+      ${EndIf}
+      StrCpy $8 '"$0"'
+      ${If} ${Silent}
+        StrCpy $8 "$8 /S"
+      ${EndIf}
+      !insertmacro ExecWaitJob r8
     ${EndIf}
   ${EndIf}
 FunctionEnd
