@@ -5,9 +5,10 @@
 #  LIB3DS_FOUND - True if lib3ds was found.
 #
 # Original Author:
-# 2019 Ryan Pavlik <ryan.pavlik@collabora.com> <ryan.pavlik@gmail.com>
+# 2019 Rylie Pavlik <rylie.pavlik@collabora.com> <rylie@ryliepavlik.com>
 #
 # Copyright 2019, Collabora, Ltd.
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
@@ -27,7 +28,7 @@ find_library(
     PATHS "${LIB3DS_ROOT_DIR}")
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LIB3DS DEFAULT_MSG LIB3DS_INCLUDE_DIR
+find_package_handle_standard_args(Lib3ds DEFAULT_MSG LIB3DS_INCLUDE_DIR
                                   LIB3DS_LIBRARY)
 
 if(LIB3DS_FOUND)

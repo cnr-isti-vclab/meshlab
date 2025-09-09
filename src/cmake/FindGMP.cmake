@@ -13,7 +13,7 @@
 #  GMP_VERSION - GMP version
 #
 # Copyright (c) 2016 Jack Poulson, <jack.poulson@gmail.com>
-# Copyright (c) 2019 Collabora, Ltd. (Ryan Pavlik <ryan.pavlik@collabora.com>)
+# Copyright (c) 2019 Collabora, Ltd. (Rylie Pavlik <rylie.pavlik@collabora.com>)
 # Redistribution and use is allowed according to the terms of the BSD license.
 
 find_path(
