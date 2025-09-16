@@ -22,8 +22,15 @@
 #############################################################################
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF "Allow download and use of lib3MF source" ON)
+option(MESHLAB_ALLOW_SYSTEM_LIB3MF "Allow use of system-provided lib3MF" ON)
 
-if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
+find_package(lib3mf)
+
+if(MESHLAB_ALLOW_SYSTEM_LIB3MF AND TARGET lib3mf::lib3mf)
+  message(STATUS "- Lib3MF - using system-provided library")
+  add_library(external-lib3mf INTERFACE)
+  target_link_libraries(external-lib3mf INTERFACE lib3mf::lib3mf)
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIB3MF)
   set(LIB3MF_VERSION "2.4.1")
 
   set(LIB3MF_DIR ${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/lib3mf-${LIB3MF_VERSION})
