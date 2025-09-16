@@ -3,8 +3,25 @@
 # SPDX-License-Identifier: BSL-1.0
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR "Allow download and use of levmar source" ON)
+option(MESHLAB_ALLOW_SYSTEM_LEVMAR "Allow use of system-provided levmar" ON)
 
-if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
+find_path(levmar_INCLUDE_DIR NAMES levmar.h PATHS ${levmar_PREFIX})
+find_library(levmar_LIBRARY NAMES levmar PATHS ${levmar_PREFIX})
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+	levmar
+	DEFAULT_MSG
+	levmar_LIBRARY
+	levmar_INCLUDE_DIR
+)
+mark_as_advanced(levmar_INCLUDE_DIR levmar_LIBRARY)
+
+if(MESHLAB_ALLOW_SYSTEM_LEVMAR AND levmar_FOUND)
+	message(STATUS "- levmar - using system-provided library")
+	add_library(external-levmar INTERFACE)
+	target_link_libraries(external-levmar INTERFACE ${levmar_LIBRARY})
+	target_include_directories(external-levmar INTERFACE ${levmar_INCLUDE_DIR})
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LEVMAR)
 	set(LEVMAR_VERSION "2.6.1")
 
 	set(LEVMAR_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/levmar-${LEVMAR_VERSION}")
