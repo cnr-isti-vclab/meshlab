@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(GLEW)
+find_dependency(OpenGL)
+find_dependency(Qt5 COMPONENTS OpenGL Xml Network)
+find_dependency(vcglib)
+
+include ( "${CMAKE_CURRENT_LIST_DIR}/meshlabTargets.cmake" )
