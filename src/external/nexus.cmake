@@ -3,11 +3,18 @@
 # SPDX-License-Identifier: BSL-1.0
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS "Allow download and use of nexus source" ON)
+option(MESHLAB_ALLOW_SYSTEM_NEXUS "Allow use of system-provided nexus and corto" ON)
 
 set(CORTO_VER 2025.07)
 set(NEXUS_VER 2025.05)
 
-if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
+find_package(nexus CONFIG)
+
+if(MESHLAB_ALLOW_SYSTEM_NEXUS AND TARGET nexus::nexus)
+	message(STATUS "- nexus - using system-provided library")
+	add_library(external-nexus INTERFACE)
+	target_link_libraries(external-nexus INTERFACE nexus::nexus)
+elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 	set(NEXUS_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/nexus-${NEXUS_VER}")
 	set(NEXUS_CHECK "${NEXUS_DIR}/CMakeLists.txt")
 	set(CORTO_DIR "${NEXUS_DIR}/src/corto")

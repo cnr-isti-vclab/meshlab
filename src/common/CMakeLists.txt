@@ -198,7 +198,8 @@ endif()
 
 target_include_directories(meshlab-common
 	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/..)
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+		$<INSTALL_INTERFACE:include>)
 
 target_link_libraries(
 	meshlab-common
@@ -208,10 +209,19 @@ target_link_libraries(
 		Qt5::Widgets
 		Qt5::Xml
 		Qt5::Network
-		vcglib
-		external-glew
+	PRIVATE
 		external-easyexif
 )
+if(TARGET vcglib::vcglib)
+	target_link_libraries(meshlab-common PUBLIC vcglib::vcglib)
+else()
+	target_link_libraries(meshlab-common PUBLIC vcglib)
+endif()
+if(TARGET GLEW::GLEW)
+	target_link_libraries(meshlab-common PUBLIC GLEW::GLEW)
+else()
+	target_link_libraries(meshlab-common PUBLIC external-glew)
+endif()
 
 set_property(TARGET meshlab-common PROPERTY FOLDER Core)
 
@@ -234,4 +244,4 @@ endif()
 set_target_properties(meshlab-common PROPERTIES
 	INSTALL_RPATH "$ORIGIN")
 
-install(TARGETS meshlab-common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
+install(TARGETS meshlab-common EXPORT meshlabTargets DESTINATION ${MESHLAB_LIB_INSTALL_DIR})

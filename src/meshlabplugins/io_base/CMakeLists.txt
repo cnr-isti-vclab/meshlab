@@ -27,4 +27,4 @@ set(SOURCES
 
 add_meshlab_plugin(io_base ${SOURCES} ${HEADERS})
 
-target_link_libraries(io_base PRIVATE OpenGL::GLU)
+target_link_libraries(io_base PRIVATE OpenGL::GLU external-easyexif)

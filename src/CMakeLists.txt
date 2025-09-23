@@ -75,7 +75,12 @@ endif()
 ### Enter subdirectories
 
 # VCGLib -- required
-if (VCGDIR) # VCGDIR exists - using custom user vcglib path
+find_package(vcglib CONFIG)
+if(TARGET vcglib::vcglib)
+	message(STATUS "- VCGLib - using system provided library")
+	add_library(vcglib ALIAS vcglib::vcglib)
+	get_target_property(VCGDIR vcglib::vcglib INTERFACE_INCLUDE_DIRECTORIES)
+elseif (VCGDIR) # VCGDIR exists - using custom user vcglib path
 	if(EXISTS ${VCGDIR})
 		add_subdirectory(${VCGDIR} {CMAKE_CURRENT_BINARY_DIR}/vcglib)
 		message(STATUS "- VCGLib - using custom VCGDIR path library")
@@ -224,6 +229,29 @@ endforeach()
 set(COPIED_FILES)
 
 if (NOT MESHLAB_BUILD_ONLY_LIBRARIES)
+	# headers
+	install(DIRECTORY common DESTINATION include FILES_MATCHING PATTERN "*.h")
+	# CMake exports
+	if(TARGET vcglib::vcglib AND TARGET GLEW::GLEW)
+		install(EXPORT meshlabTargets
+			DESTINATION lib/cmake/meshlab
+			NAMESPACE meshlab::
+			FILE meshlabTargets.cmake
+		)
+		include(CMakePackageConfigHelpers)
+		# generate the config file that includes the exports
+		configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+			"${CMAKE_CURRENT_BINARY_DIR}/meshlabConfig.cmake"
+			INSTALL_DESTINATION lib/cmake/vcglib
+			NO_SET_AND_CHECK_MACRO
+			NO_CHECK_REQUIRED_COMPONENTS_MACRO
+		)
+		install(FILES
+			"${CMAKE_CURRENT_BINARY_DIR}/meshlabConfig.cmake"
+			DESTINATION lib/cmake/meshlab
+		)
+	endif()
+
 	# shaders
 	set(SHADER_BASE_DIR "${MESHLAB_RESOURCES_DIR}/shaders")
 	file(
