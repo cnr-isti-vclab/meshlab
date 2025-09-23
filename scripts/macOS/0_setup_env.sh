@@ -22,7 +22,8 @@ case $i in
 esac
 done
 
-brew install coreutils node cmake ninja libomp cgal xerces-c tbb embree
+brew install cmake 
+brew install coreutils node ninja libomp cgal xerces-c tbb embree
 npm install -g appdmg
 
 if [ "$DONT_INSTALL_QT" = false ] ; then

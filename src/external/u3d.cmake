@@ -4,15 +4,17 @@
 
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D "Allow download and use of u3d source" ON)
 
+set(U3D_VERSION 1.5.2)
+
 if(MESHLAB_ALLOW_DOWNLOAD_SOURCE_U3D)
-	set(U3D_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/u3d-1.5.1")
+	set(U3D_DIR "${MESHLAB_EXTERNAL_DOWNLOAD_DIR}/u3d-${U3D_VERSION}")
 	set(U3D_CHECK "${U3D_DIR}/CMakeLists.txt")
 
 	if (NOT EXISTS ${U3D_CHECK})
 		set(U3D_LINK
-			https://github.com/alemuntoni/u3d/archive/refs/tags/1.5.1.zip
-			https://www.meshlab.net/data/libs/u3d-1.5.1.zip)
-		set(U3D_MD5 3f74c48d6c69671ff074f27b7dc1b926)
+			https://github.com/alemuntoni/u3d/archive/refs/tags/${U3D_VERSION}.zip
+			https://www.meshlab.net/data/libs/u3d-${U3D_VERSION}.zip)
+		set(U3D_MD5 28d28c03e39166bc2f756e7f6d769c02)
 		download_and_unzip(
 			NAME "u3d"
 			LINK ${U3D_LINK}
