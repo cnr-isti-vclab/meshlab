@@ -237,6 +237,7 @@ jobs:
         token: "${{ secrets.GITHUB_TOKEN }}"
         tag: "MeshLab-${{steps.envs.outputs.ml_version}}"
         name: "MeshLab-${{steps.envs.outputs.ml_version}}"
+        body: "Note about the ${{steps.envs.outputs.ml_version}}d version: these releases are built with double precision floating point numbers."
         artifacts: |
           MeshLab${{steps.envs.outputs.ml_version}}-linux_x86_64.tar.gz
           MeshLab${{steps.envs.outputs.ml_version_d}}-linux_x86_64.tar.gz
