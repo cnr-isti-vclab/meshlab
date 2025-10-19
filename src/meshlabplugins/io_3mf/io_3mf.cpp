@@ -119,7 +119,7 @@ Lib3MFPlugin::Lib3MFPlugin()
 
 QString Lib3MFPlugin::pluginName() const
 {
-    return "IO3MF";
+	return "IO3MF";
 }
 
 std::list<FileFormat> Lib3MFPlugin::importFormats() const
@@ -303,6 +303,7 @@ void read_components(
 		if (component->HasTransform()) {
 			auto      transform = component->GetTransform();
 			Matrix44m componentT;
+			componentT.SetZero();
 			componentT.ElementAt(0, 0) = transform.m_Fields[0][0];
 			componentT.ElementAt(0, 1) = transform.m_Fields[0][1];
 			componentT.ElementAt(0, 2) = transform.m_Fields[0][2];
@@ -386,7 +387,7 @@ void Lib3MFPlugin::open(
 		while (build_item_iterator->MoveNext()) {
 			if (cb != nullptr) {
 				(*cb)(
-					delta_progress * build_item_count,
+					delta_progress* build_item_count,
 					std::string("Loading mesh " + std::to_string(build_item_count)).c_str());
 			}
 			auto& mesh_model         = *(mesh_model_iterator++);
@@ -417,6 +418,7 @@ void Lib3MFPlugin::open(
 			if (current_build_item->HasObjectTransform()) {
 				auto      transform = current_build_item->GetObjectTransform();
 				Matrix44m T;
+				T.SetZero();
 				T.ElementAt(0, 0) = transform.m_Fields[0][0];
 				T.ElementAt(0, 1) = transform.m_Fields[0][1];
 				T.ElementAt(0, 2) = transform.m_Fields[0][2];
