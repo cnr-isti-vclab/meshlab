@@ -35,7 +35,7 @@
 #include <QSettings>
 #include <IDTF/Converter.h>
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
