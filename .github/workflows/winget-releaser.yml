@@ -1,11 +1,7 @@
 name: Publish release to WinGet
 on:
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: "Specific tag name"
-        required: false
-        type: string
+  release:
+    types: [released]
 
 jobs:
   publish:
@@ -14,7 +10,7 @@ jobs:
       - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: CNRISTI.MeshLab
-          installers-regex: '${{ inputs.tag_name }}-windows_x86_64.exe'
-          version: ${{ inputs.tag_name }}
+          installers-regex: '${{ github.event.release.tag_name }}-windows_x86_64.exe'
+          version: ${{ github.event.release.tag_name }}
           token: ${{ secrets.WINGET_ACC_TOKEN }}
           fork-user: alemuntoni
