@@ -249,6 +249,8 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		parlst.addParam(RichInt("dummy_check_size", 8, "Check size", "Size in pixel of the checkerboard of the dummy texture."));
 		parlst.addParam(RichEnum("dummy_type", 0, QStringList("Checkboard")  << "Grid", "Dummy Texture Type",
 								 "Choose what kind of dummy texture you want, a grid with lines or a checkboard"));
+		parlst.addParam(RichBool("update_texture", false, "Update existing texture", 
+								 "When checked, if the passed texture file name (extension included) matches an already present texture, it updates its map with the new content."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
@@ -684,16 +686,23 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		// Get parameters
 		bool setDummy = par.getBool("use_dummy_texture");
 		bool gridFlag = par.getEnum("dummy_type")==0;
+		bool updateExistingTexture  = par.getBool("update_texture"); 
 		if (!setDummy) {
 			QString textName = par.getOpenFileName("textName");
-
 			CheckError(textName.length() == 0, "Texture file not specified");
-
 			QImage textFile = meshlab::loadImage(textName, &md.Log, cb);
 			QFileInfo finfo(textName);
-			//Assign texture
-			m.clearTextures();
-			m.addTexture(finfo.fileName().toStdString(), textFile);
+			//Assign texture 
+			std::string fileName = finfo.fileName().toStdString();
+			// When `updateExistingTexture` is set to false, all previous textures 
+			// associated to the mesh are discarded, loading only the new one.
+			if (!updateExistingTexture) {
+				m.clearTextures();
+				m.addTexture(fileName, textFile);
+			} 
+			// // When `updateExistingTexture` is set to true, it is tried to substitute
+			// // the new texture content with the one associated to the same file's name.
+			else  m.setTexture(fileName, textFile);
 		}
 		else {
 			int imgSize = par.getInt("dummy_img_size");
