@@ -88,6 +88,8 @@ QString MeshModel::relativePathName(const QString& path) const
  * "textures".
  *
  * When a texture is not found, a dummy texture will be used (":/resources/images/dummy.png").
+ * Be aware that in the loaded mesh, the missing texture original names will be preserved, even 
+ * though they all have been substitued by the dummy texture.
  *
  * Returns the list of non-loaded textures that have been modified with
  * ":/img/dummy.png" in the contained mesh.
@@ -121,7 +123,7 @@ std::list<std::string> MeshModel::loadTextures(
 							"Failed loading " + textName + "; using a dummy texture\n";
 					}
 					unloadedTextures.push_back(textName);
-					textName = "dummy.png";
+					// textName = "dummy.png";	// commented in order to mantain the missing texture names.
 				}
 			}
 			textures[textName] = img;
