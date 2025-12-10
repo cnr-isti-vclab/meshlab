@@ -700,8 +700,8 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 				m.clearTextures();
 				m.addTexture(fileName, textFile);
 			} 
-			// // When `updateExistingTexture` is set to true, it is tried to substitute
-			// // the new texture content with the one associated to the same file's name.
+			// When `updateExistingTexture` is set to true, substitute the new
+			// texture content with the one associated to the same file's name.
 			else  m.setTexture(fileName, textFile);
 		}
 		else {
