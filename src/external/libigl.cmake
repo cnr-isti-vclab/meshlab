@@ -5,7 +5,7 @@
 option(MESHLAB_ALLOW_DOWNLOAD_SOURCE_LIBIGL "Allow download and use of LibIGL source" ON)
 option(MESHLAB_ALLOW_SYSTEM_LIBIGL "Allow use of system-provided LibIGL" ON)
 
-set(LIBIGL_VER 2.4.0)
+set(LIBIGL_VER 2.6.0)
 
 find_path(libigl_INCLUDE_DIR NAMES igl_inline.h PATH_SUFFIXES igl PATHS ${libigl_PREFIX})
 
