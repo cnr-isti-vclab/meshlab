@@ -104,7 +104,7 @@ std::map<std::string, QImage> load_textures(const Lib3MF::PModel& model)
 		std::vector<Lib3MF_uint8> buffer;
 		attachment->WriteToBuffer(buffer);
 		QImage image;
-		image.loadFromData(buffer.data(), buffer.size());
+		image.loadFromData(buffer.data(), static_cast<int>(buffer.size()));
 		result.insert({std::to_string(id), image});
 	}
 
@@ -203,13 +203,20 @@ void to_cmesh(const Lib3MF::PMeshObject& mesh_object, CMeshO& target)
 	auto n_vertices  = mesh_object->GetVertexCount();
 	auto n_triangles = mesh_object->GetTriangleCount();
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4267 )
+#endif
 	auto vertex_iterator =
 		vcg::tri::Allocator<std::remove_reference_t<decltype(target)>>::AddVertices(
 			target, n_vertices);
 	auto face_iterator = vcg::tri::Allocator<std::remove_reference_t<decltype(target)>>::AddFaces(
 		target, n_triangles);
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
-	for (int i = 0; i < n_vertices; ++i) {
+	for (std::uint32_t i = 0; i < n_vertices; ++i) {
 		const auto& pos           = mesh_object->GetVertex(i).m_Coordinates;
 		(*vertex_iterator).P()[0] = pos[0];
 		(*vertex_iterator).P()[1] = pos[1];
@@ -217,7 +224,7 @@ void to_cmesh(const Lib3MF::PMeshObject& mesh_object, CMeshO& target)
 		++vertex_iterator;
 	}
 
-	for (size_t i = 0; i < n_triangles; ++i) {
+	for (std::uint32_t i = 0; i < n_triangles; ++i) {
 		const auto& tri       = mesh_object->GetTriangle(i).m_Indices;
 		(*face_iterator).V(0) = &target.vert[tri[0]];
 		(*face_iterator).V(1) = &target.vert[tri[1]];
@@ -232,7 +239,7 @@ bool append_props(const Lib3MF::PModel model, const Lib3MF::PMeshObject mesh_obj
 
 	bool result = false;
 
-	for (int i = 0; i < n_triangles; ++i) {
+	for (std::uint32_t i = 0; i < n_triangles; ++i) {
 		Lib3MF::sTriangleProperties props;
 		mesh_object->GetTriangleProperties(i, props);
 		if (props.m_ResourceID == 0) {
@@ -294,9 +301,10 @@ void read_components(
 	const Lib3MF::PModel&            model,
 	const Lib3MF::PComponentsObject& componentsObject,
 	MeshModel&                       meshModel,
-	Matrix44m                        T)
+	Matrix44m                        T,
+	bool                             useColors)
 {
-	for (int iComponent = 0; iComponent < componentsObject->GetComponentCount(); ++iComponent) {
+	for (std::uint32_t iComponent = 0; iComponent < componentsObject->GetComponentCount(); ++iComponent) {
 		auto component        = componentsObject->GetComponent(iComponent);
 		auto objectResource   = component->GetObjectResource();
 		auto currentTransform = T;
@@ -330,11 +338,20 @@ void read_components(
 			to_cmesh(meshObject, new_cmesh);
 			new_cmesh.face.EnableColor();
 			new_cmesh.face.EnableWedgeTexCoord();
-			meshModel.enable(
-				vcg::tri::io::Mask::IOM_FACECOLOR | vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
-			append_props(model, meshObject, new_cmesh);
+			if (useColors) {
+				meshModel.enable(
+					vcg::tri::io::Mask::IOM_FACECOLOR | vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
+				append_props(model, meshObject, new_cmesh);
+			}
 			vcg::tri::UpdatePosition<decltype(meshModel.cm)>::Matrix(new_cmesh, currentTransform);
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4267 )
+#endif
 			vcg::tri::Append<CMeshO, CMeshO>::Mesh(meshModel.cm, new_cmesh);
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 		}
 		else if (objectResource->IsComponentsObject()) {
 			std::cout << "Component " << objectResource->GetUniqueResourceID() << std::endl;
@@ -343,7 +360,8 @@ void read_components(
 				model,
 				model->GetComponentsObjectByID(objectResource->GetUniqueResourceID()),
 				meshModel,
-				currentTransform);
+				currentTransform,
+			    useColors);
 		}
 	}
 }
@@ -358,6 +376,8 @@ void Lib3MFPlugin::open(
 {
 	const QString errorMsgFormat =
 		"Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+
+	bool useColors = par.getBool("usecolors");
 
 	// Lib3MF doesn't seem to account for the fact that an object may contain a
 	// sequence of components and meshes, we can only access either a single
@@ -379,15 +399,16 @@ void Lib3MFPlugin::open(
 		auto build_item_iterator = get_build_item_iterator(lib3mf_model);
 		auto mesh_model_iterator = meshModelList.begin();
 		auto textures            = load_textures(lib3mf_model);
+		maskList.resize(meshModelList.size());
 
 		auto build_item_count = 0;
 
-		auto delta_progress = 100 / build_item_iterator->Count();
+		auto delta_progress = 100. / build_item_iterator->Count();
 
 		while (build_item_iterator->MoveNext()) {
 			if (cb != nullptr) {
 				(*cb)(
-					delta_progress* build_item_count,
+					static_cast<int>(delta_progress * build_item_count),
 					std::string("Loading mesh " + std::to_string(build_item_count)).c_str());
 			}
 			auto& mesh_model         = *(mesh_model_iterator++);
@@ -402,9 +423,11 @@ void Lib3MFPlugin::open(
 				auto mesh_object =
 					lib3mf_model->GetMeshObjectByID(object_resource->GetUniqueResourceID());
 				to_cmesh(mesh_object, mesh_model->cm);
-				mesh_model->enable(
-					vcg::tri::io::Mask::IOM_FACECOLOR | vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
-				append_props(lib3mf_model, mesh_object, mesh_model->cm);
+				if (useColors) {
+					mesh_model->enable(
+						vcg::tri::io::Mask::IOM_FACECOLOR | vcg::tri::io::Mask::IOM_WEDGTEXCOORD);
+					append_props(lib3mf_model, mesh_object, mesh_model->cm);
+				}
 			}
 			else if (object_resource->IsComponentsObject()) {
 				read_components(
@@ -412,7 +435,8 @@ void Lib3MFPlugin::open(
 					lib3mf_model,
 					lib3mf_model->GetComponentsObjectByID(object_resource->GetUniqueResourceID()),
 					*mesh_model,
-					Matrix44m::Identity());
+					Matrix44m::Identity(),
+					useColors);
 			}
 
 			if (current_build_item->HasObjectTransform()) {
