@@ -929,18 +929,11 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 		updateColumnNumber(vertItem);
 	}
 
-	int i = 1;
 	for (const std::string& name : meshModel->cm.textures) {
 		QTreeWidgetItem* vertItem = new QTreeWidgetItem();
-		
-		std::string indexStr = std::string(4, ' ') + "[ " + std::to_string(i) + " ]";
-		vertItem->setText(1, QString(indexStr.c_str()));
-		i++;
-
 		vertItem->setText(2, QString(name.c_str()));
 		const QImage& img  = meshModel->getTexture(name);
 		QString       size = QString::number(img.width()) + "x" + QString::number(img.height());
-		
 		vertItem->setText(3, QString(size));
 		parent->addChild(vertItem);
 		updateColumnNumber(vertItem);
