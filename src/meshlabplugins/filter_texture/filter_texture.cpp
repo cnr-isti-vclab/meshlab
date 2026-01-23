@@ -24,6 +24,7 @@
 
 #include <Eigen/Sparse>
 
+#include <float.h>
 #include <stdlib.h>
 #include "filter_texture.h"
 #include "pushpull.h"
