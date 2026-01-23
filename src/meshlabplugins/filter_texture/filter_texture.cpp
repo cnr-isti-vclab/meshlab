@@ -24,11 +24,11 @@
 
 #include <Eigen/Sparse>
 
-#include <float.h>
 #include <stdlib.h>
 #include "filter_texture.h"
 #include "pushpull.h"
 #include "rastering.h"
+#include "texture_packer.h"
 #include <vcg/complex/algorithms/update/texture.h>
 #include<wrap/io_trimesh/export_ply.h>
 #include <vcg/complex/algorithms/parametrization/voronoi_atlas.h>
@@ -36,133 +36,6 @@
 #include <QStandardPaths>
 
 using namespace vcg;
-
-/**
- * This class represents an entity responsible for managing information
- * for moving all textures coming from a source texture space into
- * the target texture space.
- *
- * It is mainly used in the filter 'Merge Textures'.
- */
-class TexturePacker {
-
-public:
-	typedef std::vector<std::reference_wrapper<const QImage>> SrcTextures;
-	typedef std::vector<QImage> DstTextures;
-
-private:
-
-	class PackInfo {
-	public:
-		std::reference_wrapper<const QImage> src;
-		int dstId;
-		QPoint dstOff;	// Pixel offset in destination.
-		QSize srcSize;	// Original pixel size.
-
-		PackInfo(const std::reference_wrapper<const QImage> src, const int dstId, const QPoint dstOff, const QSize srcSize)
-			: src(src), dstId(dstId), dstOff(dstOff), srcSize(srcSize) { }
-	};
-
-	std::vector<PackInfo> map;	// Entry 'i' contains the information for moving the
-								// i-th source texture into destination space.
-	std::vector<QSize> dstSizes;	// Sizes for each resulting merged texture.
-
-public:
-
-	/**
-	 * Creates an instance, determining the mapping from moving each source texture into
-	 * the destination textures.
-	 *
-	 * @param srcTexts the set of textures we want to compact.
-	 * @param dstCount the amount of final destination texture the instance will produce.
-	 */
-	TexturePacker (const SrcTextures &srcTexts, const int dstCount) {
-			if (srcTexts.empty() || dstCount <= 0) return;
-
-			const size_t texturesPerDst = (srcTexts.size() + dstCount - 1) / dstCount;
-			int currentId = 0;
-			QSize currentSize(0, 0);
-
-			for (size_t i = 0; i < srcTexts.size(); ++i) {
-				const QImage &src = srcTexts[i].get();
-
-				// TODO: make the packing square (use pack_rect as a reference).
-				auto dstId = currentId;
-				auto dstOff = QPoint(0, currentSize.height());
-				auto srcSize = src.size();
-				map.emplace_back(srcTexts[i], dstId, dstOff, srcSize);
-
-				currentSize.setWidth(std::max(currentSize.width(), src.width()));
-				currentSize.setHeight(currentSize.height() + src.height());
-
-				// Check if we should move to the next destination texture
-				if ((i + 1) % texturesPerDst == 0  && (currentId + 1) < dstCount) {
-					dstSizes.push_back(currentSize);
-					currentId++;
-					currentSize = QSize(0, 0);
-				}
-			}
-			// Add the last calculated size
-			dstSizes.push_back(currentSize);
-	}
-
-	/**
-	 * Returns the set of merged images mapped to the source texture given to the instance during construction.
-	 */
-	DstTextures packTextures() const {
-		// We are assuming that all source textures share the same format.
-		const auto dstFormat = map[0].src.get().format();
-
-		DstTextures dstTexts;
-		for (const QSize &size : dstSizes) {
-			QImage img(size, dstFormat);
-			img.fill(0);
-			dstTexts.push_back(img);
-		}
-
-		for (const auto &item : map ) {
-			const QImage& src = item.src.get();
-			QImage& dst = dstTexts[item.dstId];
-
-			const auto bytesToCopy = src.bytesPerLine();
-			for (int y = 0; y < src.height(); ++y) {
-				const auto srcLine = src.constScanLine(y);
-				const auto dstLine = dst.scanLine(item.dstOff.y() + y);
-				memcpy(dstLine, srcLine, bytesToCopy);
-			}
-		}
-		return dstTexts;
-	}
-	/**
-	 * Updates the 'mesh' wedge texture coordinates to point to the new textures;
-	 *
-	 * @param mesh: the source mesh for which the coordinates will change.
-	 */
-	void updateTextureCoordinates (MeshModel &mesh) const {
-		for (auto &face : mesh.cm.face) {
-			if (face.IsD())	continue;
-
-			const int oldId = face.WT(0).N();
-			if (oldId < 0 || oldId >= static_cast<int>(map.size()))	continue;
-
-			const auto &info = map[oldId];
-			const auto &dSize = dstSizes[info.dstId];
-
-			for (int k = 0; k < face.VN(); ++k) {
-				face.WT(k).N() = static_cast<short>(info.dstId);
-
-				// Remap U
-				face.WT(k).U() = face.WT(k).U() * info.srcSize.width() / dSize.width();
-
-				// Remap V: note that QImage stores coordinates top-down, meshlab bottom-up.
-				const float v_offset_from_bottom = dSize.height() - info.dstOff.y() - info.srcSize.height();
-				const float v_concrete = (face.WT(k).V() * info.srcSize.height()) + v_offset_from_bottom;
-				face.WT(k).V() = v_concrete / dSize.height();	// apply normalization before storing the value.
-			}
-		}
-	}
-
-};
 
 // ERROR CHECKING UTILITY
 #define CheckError(x,y); if ((x)) {throw MLException((y));}
@@ -246,7 +119,7 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
 	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else the filter will fail with no further actions. If specified it can create and associate a dummy texture with a specified grid or checkboard pattern.");
 	case FP_RENAME_TEXTURE : return QString("Changes the name of an existing texture to one provided by the user, while keeping the same content.<br>" "The new name must be different than any of the texture names already present, else the filter will do nothing.<br>" "It is useful for changing a specific referenced texture file.");
-	case FP_MERGE_TEXTURE : return QString("Returns a new mesh having merged the original textures into the number of bigger ones requested by the user. The new texture will grow vertically.<br>" "The number of textures in the new mesh must be smaller than the number of textures in the starting mesh, else the filter will do nothing.");
+	case FP_MERGE_TEXTURE : return QString("Returns a new mesh, having as textures a requested amount obtained by merging the original image. The number of final textures must be greater or equal to the ones in the source texture, else the filter will do nothing.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture color, vertex color or normal from one mesh the texture of another mesh. This may be useful to restore detail lost in simplification, or resample a texture in a different parametrization.");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from a texture (same mesh or another mesh).");
@@ -405,7 +278,7 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 		parlst.addParam(RichString("newTextName", "", "New texture name", "The new name to give to the existing texture."));
 		break;
 	case FP_MERGE_TEXTURE :
-		parlst.addParam(RichInt("numOfTextures", 1, "Number of resulting textures", "The number of textures compacting the original ones, generated by the algorithm."));
+		parlst.addParam(RichInt("numOfTextures", 1, "Number of resulting merged textures", "The number of resulting textures packing the original ones."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
@@ -919,8 +792,6 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		for (size_t i = 0; i < dstTextures.size(); i++) {
 			std::string tName = "merged_" + std::to_string(i + 1);
 			destinationMesh.addTexture(tName, dstTextures[i]);
-
-			dstTextures[i].save(QString::fromStdString(tName) + ".png", "PNG");	// Debug
 		}
 
 		cb(80, "Updating texture mapping...");
