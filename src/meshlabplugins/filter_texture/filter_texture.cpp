@@ -24,11 +24,11 @@
 
 #include <Eigen/Sparse>
 
-#include <float.h>
 #include <stdlib.h>
 #include "filter_texture.h"
 #include "pushpull.h"
 #include "rastering.h"
+#include "texture_packer.h"
 #include <vcg/complex/algorithms/update/texture.h>
 #include<wrap/io_trimesh/export_ply.h>
 #include <vcg/complex/algorithms/parametrization/voronoi_atlas.h>
@@ -49,6 +49,8 @@ FilterTexturePlugin::FilterTexturePlugin()
 		FP_UV_VERTEX_TO_WEDGE,
 		FP_BASIC_TRIANGLE_MAPPING,
 		FP_SET_TEXTURE,
+		FP_RENAME_TEXTURE,
+		FP_MERGE_TEXTURES,
 		FP_PLANAR_MAPPING,
 		FP_COLOR_TO_TEXTURE,
 		FP_TRANSFER_TO_TEXTURE,
@@ -74,6 +76,8 @@ QString FilterTexturePlugin::filterName(ActionIDType filterId) const
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("Parametrization: Trivial Per-Triangle");
 	case FP_PLANAR_MAPPING : return QString("Parametrization: Flat Plane");
 	case FP_SET_TEXTURE : return QString("Set Texture");
+	case FP_RENAME_TEXTURE : return QString("Rename Texture");
+	case FP_MERGE_TEXTURES : return QString("Merge Textures");
 	case FP_COLOR_TO_TEXTURE : return QString("Transfer: Vertex Color to Texture");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer: Vertex Attributes to Texture (1 or 2 meshes)");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Transfer: Texture to Vertex Color (1 or 2 meshes)");
@@ -91,6 +95,8 @@ QString FilterTexturePlugin::pythonFilterName(ActionIDType f) const
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("compute_texcoord_parametrization_triangle_trivial_per_wedge");
 	case FP_PLANAR_MAPPING : return QString("compute_texcoord_parametrization_flat_plane_per_wedge");
 	case FP_SET_TEXTURE : return QString("set_texture_per_mesh");
+	case FP_RENAME_TEXTURE : return QString("rename_texture_per_mesh");
+	case FP_MERGE_TEXTURES : return QString("merge_texture_per_mesh");
 	case FP_COLOR_TO_TEXTURE : return QString("compute_texmap_from_color");
 	case FP_TRANSFER_TO_TEXTURE : return QString("transfer_attributes_to_texture_per_vertex");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("transfer_texture_to_color_per_vertex");
@@ -112,6 +118,8 @@ QString FilterTexturePlugin::filterInfo(ActionIDType filterId) const
 	case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
 	case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
 	case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>" "If the texture provided exists, then it will be simply associated to the current mesh; else the filter will fail with no further actions. If specified it can create and associate a dummy texture with a specified grid or checkboard pattern.");
+	case FP_RENAME_TEXTURE : return QString("Changes the name of an existing texture to one provided by the user, while keeping the same content.<br>" "The new name must be different than any of the texture names already present, else the filter will do nothing.<br>" "It is useful for changing a specific referenced texture file.");
+	case FP_MERGE_TEXTURES : return QString("Returns a new mesh, having as textures a requested amount obtained by merging the original image. The number of final textures must be greater or equal to the ones in the source texture, else the filter will do nothing.");
 	case FP_COLOR_TO_TEXTURE : return QString("Fills the specified texture using per-vertex color data of the mesh.");
 	case FP_TRANSFER_TO_TEXTURE : return QString("Transfer texture color, vertex color or normal from one mesh the texture of another mesh. This may be useful to restore detail lost in simplification, or resample a texture in a different parametrization.");
 	case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Generates Vertex Color values picking color from a texture (same mesh or another mesh).");
@@ -130,6 +138,8 @@ int FilterTexturePlugin::getPreConditions(const QAction *a) const
 	case FP_VORONOI_ATLAS :
 	case FP_PLANAR_MAPPING : return MeshModel::MM_FACENUMBER;
 	case FP_SET_TEXTURE : return MeshModel::MM_WEDGTEXCOORD;
+	case FP_RENAME_TEXTURE : return MeshModel::MM_NONE;
+	case FP_MERGE_TEXTURES : return MeshModel::MM_NONE;
 	case FP_COLOR_TO_TEXTURE : return MeshModel::MM_VERTCOLOR | MeshModel::MM_WEDGTEXCOORD;
 	case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
 	case FP_TEX_TO_VCOLOR_TRANSFER : return MeshModel::MM_NONE;
@@ -148,6 +158,8 @@ int FilterTexturePlugin::getRequirements(const QAction *a)
 	case FP_BASIC_TRIANGLE_MAPPING :
 	case FP_PLANAR_MAPPING :
 	case FP_SET_TEXTURE : return MeshModel::MM_NONE;
+	case FP_RENAME_TEXTURE: return MeshModel::MM_NONE;
+	case FP_MERGE_TEXTURES : return MeshModel::MM_NONE;
 	case FP_COLOR_TO_TEXTURE : return MeshModel::MM_FACEFACETOPO;
 	case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
 	case FP_TEX_TO_VCOLOR_TRANSFER : return MeshModel::MM_NONE;
@@ -166,6 +178,8 @@ int FilterTexturePlugin::postCondition(const QAction *a) const
 	case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
 	case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
 	case FP_SET_TEXTURE : return MeshModel::MM_NONE;
+	case FP_RENAME_TEXTURE : return MeshModel::MM_NONE;
+	case FP_MERGE_TEXTURES : return MeshModel::MM_NONE;
 	case FP_COLOR_TO_TEXTURE : return MeshModel::MM_NONE;
 	case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
 	case FP_TEX_TO_VCOLOR_TRANSFER: return MeshModel::MM_VERTCOLOR;
@@ -187,6 +201,8 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(const QAction *a)
 	case FP_BASIC_TRIANGLE_MAPPING :
 	case FP_PLANAR_MAPPING :
 	case FP_SET_TEXTURE :
+	case FP_RENAME_TEXTURE :
+	case FP_MERGE_TEXTURES : 
 	case FP_COLOR_TO_TEXTURE :
 	case FP_TRANSFER_TO_TEXTURE : return FilterPlugin::Texture;
 	case FP_TEX_TO_VCOLOR_TRANSFER : return FilterClass(FilterPlugin::VertexColoring + FilterPlugin::Texture);
@@ -223,6 +239,11 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 			break;
 		}
 	}
+
+	QStringList textureNames = QStringList();
+	for(auto const x : trg->getTextures()) 
+		textureNames.append(QString(x.first.c_str()));
+
 	QString trgFileName = extractFilenameTexture(trg);
 	switch(ID(action)) {
 	case FP_VORONOI_ATLAS :
@@ -251,6 +272,13 @@ RichParameterList FilterTexturePlugin::initParameterList(const QAction *action, 
 								 "Choose what kind of dummy texture you want, a grid with lines or a checkboard"));
 		parlst.addParam(RichBool("update_texture", false, "Update existing texture", 
 								 "When checked, if the passed texture file name (extension included) matches an already present texture, it updates its map with the new content."));
+		break;
+	case FP_RENAME_TEXTURE :
+		parlst.addParam(RichEnum("oldTextName", 0, textureNames, "Old texture name", "The name that will be replaced."));
+		parlst.addParam(RichString("newTextName", "", "New texture name", "The new name to give to the existing texture."));
+		break;
+	case FP_MERGE_TEXTURES :
+		parlst.addParam(RichInt("numOfTextures", 1, "Number of resulting merged textures", "The number of resulting textures packing the original ones."));
 		break;
 	case FP_COLOR_TO_TEXTURE : {
 		parlst.addParam(RichString("textName", "", "Texture name", "The name of the texture to be created"));
@@ -714,7 +742,65 @@ std::map<std::string, QVariant> FilterTexturePlugin::applyFilter(
 		}
 	}
 		break;
+
+	case FP_RENAME_TEXTURE : {
+		std::string newName = par.getString("newTextName").toStdString();
 		
+		// Retrieving the user's name to replace.
+		int choice = par.getEnum("oldTextName");
+		auto it = m.getTextures().begin();
+		for (int i = 0; i < choice; i++) it++;
+		std::string oldName = it->first;
+
+		// The operation is permitted only if there is no
+		// other texture in the mesh sharing the same name.
+		bool existSame = false;
+		for(auto const x : m.getTextures()) 
+			if (x.first.compare(newName) == 0)	existSame = true;
+		if(!existSame) m.changeTextureName(oldName, newName);
+	}
+		break;
+
+	case FP_MERGE_TEXTURES: {
+		// Phase 1: loading user's parameters and retrieve source textures.
+		cb(0, "loading user's parameters...");
+
+		int numOfTextures = par.getInt("numOfTextures");
+		if (m.getTextures().size() < numOfTextures) {
+			log ("The number of requested textures must be smaller than the current textures in the mesh.");
+			break;
+		}
+
+		typedef std::vector<std::reference_wrapper<const QImage>> SrcTextures;
+		typedef std::vector<QImage> DstTextures;
+		SrcTextures srcTextures;
+		for (auto &srcTexture : m.getTextures()) {
+			srcTextures.push_back(std::ref(srcTexture.second));
+		}
+
+		// Phase 2: Pack textures into the destination textures
+		cb(30, "packing source textures...");
+		TexturePacker packer(srcTextures, numOfTextures);
+		DstTextures dstTextures = packer.packTextures();
+
+		// Phase 4: Create a copy of the source mesh, having as textures the destination ones.
+		cb(60, "Creating the mesh...");
+
+		MeshModel &destinationMesh = *(md.addNewMesh(m.cm, "merged_" + m.label()));
+		destinationMesh.clearTextures();
+
+		for (size_t i = 0; i < dstTextures.size(); i++) {
+			std::string tName = "merged_" + std::to_string(i + 1);
+			destinationMesh.addTexture(tName, dstTextures[i]);
+		}
+
+		cb(80, "Updating texture mapping...");
+		packer.updateTextureCoordinates(destinationMesh);
+
+		cb(100, "Done!");
+	}
+		break;
+
 	case FP_COLOR_TO_TEXTURE : 
 	{
 		QString textName = par.getString("textName");
