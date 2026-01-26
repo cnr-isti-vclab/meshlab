@@ -91,7 +91,7 @@ QString FilterSamplePlugin::pythonFilterName(ActionIDType f) const
 {
 	switch(filterId) {
 	case FP_MOVE_VERTEX :
-		return "Move the vertices of the mesh of a random quantity.";
+		return "Move the vertices of the mesh of a random quantity. It can be used to add some white noise to a mesh or a point cloud.";
 	default :
 		assert(0);
 		return "Unknown Filter";

@@ -1,6 +1,7 @@
 #ifndef FIT_ROTATIONS_L1_H
 #define FIT_ROTATIONS_L1_H
 
+#include <cassert>
 #include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Sparse>
