@@ -1,6 +1,7 @@
 #ifndef ORTHOGONAL_PROCRUSTES_H
 #define ORTHOGONAL_PROCRUSTES_H
 
+#include <cassert>
 #include <iostream>
 #include <Eigen/Core>
 #include <igl/svd3x3.h>
