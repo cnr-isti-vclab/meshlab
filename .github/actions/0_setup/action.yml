@@ -10,7 +10,7 @@ inputs:
   qt-version:
     description: 'Qt Version'
     required: false
-    default: '5.15.2'
+    default: '5.15.*'
 
 runs:
   using: "composite"
@@ -23,7 +23,7 @@ runs:
         echo "Install Qt Action: ${{ inputs.use-jurpel-qt-action }}"
     - name: Install Qt
       if: inputs.use-jurpel-qt-action == 'true'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         cache: true
         version: ${{ inputs.qt-version }}
