@@ -113,6 +113,7 @@ public:
 	static bool QCallBack(const int pos, const char * str);
 	//const QString appName() const {return tr("MeshLab v")+appVer(); }
 	//const QString appVer() const {return tr("1.3.2"); }
+	RichParameterList& getCurrentParameterList();
 	MainWindowSetting mwsettings;
 public slots:
 	// callback function to execute a filter
@@ -531,6 +532,9 @@ private:
 	static QString getDecoratedFileName(const QString& name);
 
 	MultiViewer_Container* _currviewcontainer;
+
+Q_SIGNALS:
+	void customSettingsChanged(const RichParameterList &rpl);
 };
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System

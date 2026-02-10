@@ -1,0 +1,1198 @@
+{
+  "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/compare/main...Z3roCo0l:main",
+  "html_url": "https://github.com/cnr-isti-vclab/meshlab/compare/main...Z3roCo0l:main",
+  "permalink_url": "https://github.com/cnr-isti-vclab/meshlab/compare/cnr-isti-vclab:684885a...Z3roCo0l:c396948",
+  "diff_url": "https://github.com/cnr-isti-vclab/meshlab/compare/main...Z3roCo0l:main.diff",
+  "patch_url": "https://github.com/cnr-isti-vclab/meshlab/compare/main...Z3roCo0l:main.patch",
+  "base_commit": {
+    "sha": "684885ade5e0075c0156f7120751e6a0fa1cf8a7",
+    "node_id": "C_kwDOBFpO6NoAKDY4NDg4NWFkZTVlMDA3NWMwMTU2ZjcxMjA3NTFlNmEwZmExY2Y4YTc",
+    "commit": {
+      "author": {
+        "name": "alemuntoni",
+        "email": "alemuntoni@users.noreply.github.com",
+        "date": "2026-02-03T11:22:11Z"
+      },
+      "committer": {
+        "name": "alemuntoni",
+        "email": "alemuntoni@users.noreply.github.com",
+        "date": "2026-02-03T11:22:11Z"
+      },
+      "message": "don't force qt 5.15.2 on actions, update install qt to v4",
+      "tree": {
+        "sha": "4da2fe0c82eff7cac59a7c34b14a04ddb747ec75",
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/4da2fe0c82eff7cac59a7c34b14a04ddb747ec75"
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/684885ade5e0075c0156f7120751e6a0fa1cf8a7",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/684885ade5e0075c0156f7120751e6a0fa1cf8a7",
+    "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/684885ade5e0075c0156f7120751e6a0fa1cf8a7",
+    "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/684885ade5e0075c0156f7120751e6a0fa1cf8a7/comments",
+    "author": {
+      "login": "alemuntoni",
+      "id": 6656168,
+      "node_id": "MDQ6VXNlcjY2NTYxNjg=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6656168?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/alemuntoni",
+      "html_url": "https://github.com/alemuntoni",
+      "followers_url": "https://api.github.com/users/alemuntoni/followers",
+      "following_url": "https://api.github.com/users/alemuntoni/following{/other_user}",
+      "gists_url": "https://api.github.com/users/alemuntoni/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/alemuntoni/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/alemuntoni/subscriptions",
+      "organizations_url": "https://api.github.com/users/alemuntoni/orgs",
+      "repos_url": "https://api.github.com/users/alemuntoni/repos",
+      "events_url": "https://api.github.com/users/alemuntoni/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/alemuntoni/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "alemuntoni",
+      "id": 6656168,
+      "node_id": "MDQ6VXNlcjY2NTYxNjg=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6656168?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/alemuntoni",
+      "html_url": "https://github.com/alemuntoni",
+      "followers_url": "https://api.github.com/users/alemuntoni/followers",
+      "following_url": "https://api.github.com/users/alemuntoni/following{/other_user}",
+      "gists_url": "https://api.github.com/users/alemuntoni/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/alemuntoni/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/alemuntoni/subscriptions",
+      "organizations_url": "https://api.github.com/users/alemuntoni/orgs",
+      "repos_url": "https://api.github.com/users/alemuntoni/repos",
+      "events_url": "https://api.github.com/users/alemuntoni/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/alemuntoni/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "21ea68a8c5cefcb4c0afffc76c7bbe52f585dfd4",
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/21ea68a8c5cefcb4c0afffc76c7bbe52f585dfd4",
+        "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/21ea68a8c5cefcb4c0afffc76c7bbe52f585dfd4"
+      }
+    ]
+  },
+  "merge_base_commit": {
+    "sha": "4f6f1ae694f37103d33be84b547d60282132a577",
+    "node_id": "C_kwDOJNynB9oAKDRmNmYxYWU2OTRmMzcxMDNkMzNiZTg0YjU0N2Q2MDI4MjEzMmE1Nzc",
+    "commit": {
+      "author": {
+        "name": "Paolo Cignoni",
+        "email": "paolo.cignoni@isti.cnr.it",
+        "date": "2023-04-14T11:46:35Z"
+      },
+      "committer": {
+        "name": "Paolo Cignoni",
+        "email": "paolo.cignoni@isti.cnr.it",
+        "date": "2023-04-14T11:46:35Z"
+      },
+      "message": "Added better comment for polyline creation from selection",
+      "tree": {
+        "sha": "b6a9cb83ccdb0f8d0d5cd8136be5c7e673066c60",
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/b6a9cb83ccdb0f8d0d5cd8136be5c7e673066c60"
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/4f6f1ae694f37103d33be84b547d60282132a577",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/4f6f1ae694f37103d33be84b547d60282132a577",
+    "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/4f6f1ae694f37103d33be84b547d60282132a577",
+    "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/4f6f1ae694f37103d33be84b547d60282132a577/comments",
+    "author": {
+      "login": "cignoni",
+      "id": 8055819,
+      "node_id": "MDQ6VXNlcjgwNTU4MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8055819?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/cignoni",
+      "html_url": "https://github.com/cignoni",
+      "followers_url": "https://api.github.com/users/cignoni/followers",
+      "following_url": "https://api.github.com/users/cignoni/following{/other_user}",
+      "gists_url": "https://api.github.com/users/cignoni/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/cignoni/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/cignoni/subscriptions",
+      "organizations_url": "https://api.github.com/users/cignoni/orgs",
+      "repos_url": "https://api.github.com/users/cignoni/repos",
+      "events_url": "https://api.github.com/users/cignoni/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/cignoni/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "cignoni",
+      "id": 8055819,
+      "node_id": "MDQ6VXNlcjgwNTU4MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8055819?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/cignoni",
+      "html_url": "https://github.com/cignoni",
+      "followers_url": "https://api.github.com/users/cignoni/followers",
+      "following_url": "https://api.github.com/users/cignoni/following{/other_user}",
+      "gists_url": "https://api.github.com/users/cignoni/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/cignoni/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/cignoni/subscriptions",
+      "organizations_url": "https://api.github.com/users/cignoni/orgs",
+      "repos_url": "https://api.github.com/users/cignoni/repos",
+      "events_url": "https://api.github.com/users/cignoni/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/cignoni/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9463c40db2dbe3cecb10b99cc5997b8268ed7a16",
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/9463c40db2dbe3cecb10b99cc5997b8268ed7a16",
+        "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/9463c40db2dbe3cecb10b99cc5997b8268ed7a16"
+      }
+    ]
+  },
+  "status": "diverged",
+  "ahead_by": 9,
+  "behind_by": 380,
+  "total_commits": 9,
+  "commits": [
+    {
+      "sha": "bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+      "node_id": "C_kwDOBFpO6NoAKGJjZjJkNmMyMDE3MzhjMzJmNjlhZmMzNDdlYjg4ZDVhOTMyMThlN2Y",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-24T13:32:16Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-24T13:32:16Z"
+        },
+        "message": "Dialogbox for mainwindow\n\nIn MainWindow_RunTime.cpp I set up some security question before reloading/reloading all/new project, and added the vs project files to git ignore.",
+        "tree": {
+          "sha": "a54d4a02fa7336c3090d746d9042100d4049fabe",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/a54d4a02fa7336c3090d746d9042100d4049fabe"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bcf2d6c201738c32f69afc347eb88d5a93218e7f/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "3a1d8f2afd805a7f2d73ca08558b71c5ba5388c7",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/3a1d8f2afd805a7f2d73ca08558b71c5ba5388c7",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/3a1d8f2afd805a7f2d73ca08558b71c5ba5388c7"
+        }
+      ]
+    },
+    {
+      "sha": "d887778f09a1ff954f46c68a9c4c306556981440",
+      "node_id": "C_kwDOBFpO6NoAKGQ4ODc3NzhmMDlhMWZmOTU0ZjQ2YzY4YTljNGMzMDY1NTY5ODE0NDA",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-25T15:16:38Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-25T15:16:38Z"
+        },
+        "message": "Remove dialogbox from new project function",
+        "tree": {
+          "sha": "f260e0171a616605e3de0a1640450c1296622f40",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/f260e0171a616605e3de0a1640450c1296622f40"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/d887778f09a1ff954f46c68a9c4c306556981440",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/d887778f09a1ff954f46c68a9c4c306556981440",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/d887778f09a1ff954f46c68a9c4c306556981440",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/d887778f09a1ff954f46c68a9c4c306556981440/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bcf2d6c201738c32f69afc347eb88d5a93218e7f",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/bcf2d6c201738c32f69afc347eb88d5a93218e7f"
+        }
+      ]
+    },
+    {
+      "sha": "799975189feaa951344f89c24155d7f1f32906f1",
+      "node_id": "C_kwDOBFpO6NoAKDc5OTk3NTE4OWZlYWE5NTEzNDRmODljMjQxNTVkN2YxZjMyOTA2ZjE",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-25T19:02:15Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-03-25T19:02:15Z"
+        },
+        "message": "Inverting Selection mode CTRL  modifier\n\nChanging the method of area selection tools, by holding the ctrl you can start a new selection, but the normal mode is the next selection is added to do current selection.",
+        "tree": {
+          "sha": "976161b1740865526c87989a7a5a98eca0df75a8",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/976161b1740865526c87989a7a5a98eca0df75a8"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/799975189feaa951344f89c24155d7f1f32906f1",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/799975189feaa951344f89c24155d7f1f32906f1",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/799975189feaa951344f89c24155d7f1f32906f1",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/799975189feaa951344f89c24155d7f1f32906f1/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "d887778f09a1ff954f46c68a9c4c306556981440",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/d887778f09a1ff954f46c68a9c4c306556981440",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/d887778f09a1ff954f46c68a9c4c306556981440"
+        }
+      ]
+    },
+    {
+      "sha": "bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+      "node_id": "C_kwDOBFpO6NoAKGJkZDlhN2Q5YjZjZjRkZWNhNjIyZGM3NWVhNWY5ODUwN2JkMzY0ZTk",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-06T19:23:09Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-06T19:23:09Z"
+        },
+        "message": "wraped the dialog boxes in tr()",
+        "tree": {
+          "sha": "52ad12f127cd081d51049d79a428fd83a3f86114",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/52ad12f127cd081d51049d79a428fd83a3f86114"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "799975189feaa951344f89c24155d7f1f32906f1",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/799975189feaa951344f89c24155d7f1f32906f1",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/799975189feaa951344f89c24155d7f1f32906f1"
+        }
+      ]
+    },
+    {
+      "sha": "86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+      "node_id": "C_kwDOBFpO6NoAKDg2YTYzY2QxMGNjMDIxYjIxMTk5ZjY3MDFiYTZkNjNlMmZhNWNmMTc",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-13T20:16:41Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-13T20:16:41Z"
+        },
+        "message": "Implementing Setting for CTRL modifier pt1",
+        "tree": {
+          "sha": "68e6a0da0a269821132c2132430cc0f72028ff2a",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/68e6a0da0a269821132c2132430cc0f72028ff2a"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/86a63cd10cc021b21199f6701ba6d63e2fa5cf17/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/bdd9a7d9b6cf4deca622dc75ea5f98507bd364e9"
+        }
+      ]
+    },
+    {
+      "sha": "c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+      "node_id": "C_kwDOBFpO6NoAKGM3MzI4YWUxZWQzZjNiNDc3YzZjYjZmYzg4ZjcxNTA3ZDhkZjc5YmM",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-16T18:31:54Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-16T18:31:54Z"
+        },
+        "message": "connect global params to edit select plugin",
+        "tree": {
+          "sha": "e064532c9ca2b62afac4d7a42fa6ec20c17d2857",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/e064532c9ca2b62afac4d7a42fa6ec20c17d2857"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/86a63cd10cc021b21199f6701ba6d63e2fa5cf17",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/86a63cd10cc021b21199f6701ba6d63e2fa5cf17"
+        }
+      ]
+    },
+    {
+      "sha": "875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+      "node_id": "C_kwDOBFpO6NoAKDg3NWFlNjVkODk4Y2Q2ZjZjNzZkNjMwMDhiZThiODJlOGJhYmRmZTE",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T11:21:25Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T11:21:25Z"
+        },
+        "message": "Modifier key pointer and info setup",
+        "tree": {
+          "sha": "b0d12653d119c8307303b1f034ffe8882aad9184",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/b0d12653d119c8307303b1f034ffe8882aad9184"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/875ae65d898cd6f6c76d63008be8b82e8babdfe1/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/c7328ae1ed3f3b477c6cb6fc88f71507d8df79bc"
+        }
+      ]
+    },
+    {
+      "sha": "2265221c111e7940b882d40ebfba2538173b1fdc",
+      "node_id": "C_kwDOBFpO6NoAKDIyNjUyMjFjMTExZTc5NDBiODgyZDQwZWJmYmEyNTM4MTczYjFmZGM",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T16:49:30Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T16:49:30Z"
+        },
+        "message": "Fix for the polyline crash tool and minor changes",
+        "tree": {
+          "sha": "c9e68f593391d69558f6fe911211bd4fbd863f45",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/c9e68f593391d69558f6fe911211bd4fbd863f45"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/2265221c111e7940b882d40ebfba2538173b1fdc",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/2265221c111e7940b882d40ebfba2538173b1fdc",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/2265221c111e7940b882d40ebfba2538173b1fdc",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/2265221c111e7940b882d40ebfba2538173b1fdc/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/875ae65d898cd6f6c76d63008be8b82e8babdfe1",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/875ae65d898cd6f6c76d63008be8b82e8babdfe1"
+        }
+      ]
+    },
+    {
+      "sha": "c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "node_id": "C_kwDOBFpO6NoAKGMzOTY5NDg2ZGUxZGZhYmJmYzBkM2I5NzU4NjZjN2E2YTM3YWZjMDA",
+      "commit": {
+        "author": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T19:16:23Z"
+        },
+        "committer": {
+          "name": "Z3roCo0l",
+          "email": "104153656+Z3roCo0l@users.noreply.github.com",
+          "date": "2023-04-17T19:16:23Z"
+        },
+        "message": "Merge branch 'devel'",
+        "tree": {
+          "sha": "3062be7fa22d037bb819d59aa5ecab566b7d7ca1",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/trees/3062be7fa22d037bb819d59aa5ecab566b7d7ca1"
+        },
+        "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/git/commits/c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "comments_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/c3969486de1dfabbfc0d3b975866c7a6a37afc00/comments",
+      "author": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "Z3roCo0l",
+        "id": 104153656,
+        "node_id": "U_kgDOBjVCOA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104153656?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Z3roCo0l",
+        "html_url": "https://github.com/Z3roCo0l",
+        "followers_url": "https://api.github.com/users/Z3roCo0l/followers",
+        "following_url": "https://api.github.com/users/Z3roCo0l/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Z3roCo0l/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Z3roCo0l/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Z3roCo0l/subscriptions",
+        "organizations_url": "https://api.github.com/users/Z3roCo0l/orgs",
+        "repos_url": "https://api.github.com/users/Z3roCo0l/repos",
+        "events_url": "https://api.github.com/users/Z3roCo0l/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Z3roCo0l/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "2265221c111e7940b882d40ebfba2538173b1fdc",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/2265221c111e7940b882d40ebfba2538173b1fdc",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/2265221c111e7940b882d40ebfba2538173b1fdc"
+        },
+        {
+          "sha": "4f6f1ae694f37103d33be84b547d60282132a577",
+          "url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/commits/4f6f1ae694f37103d33be84b547d60282132a577",
+          "html_url": "https://github.com/cnr-isti-vclab/meshlab/commit/4f6f1ae694f37103d33be84b547d60282132a577"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "sha": "7f0f7fb7b801005d56351c5d66a5fb245f87adf9",
+      "filename": ".gitignore",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/.gitignore",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/.gitignore",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/.gitignore?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -1,3 +1,4 @@\n+/.vs\n ## MeshLab GitIgnore ##\n *.ipch\n *.pdb"
+    },
+    {
+      "sha": "ac1b3acd58e06b39e07fb998f09996fc9382981f",
+      "filename": "src/common/CMakeLists.txt",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2FCMakeLists.txt",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2FCMakeLists.txt",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fcommon%2FCMakeLists.txt?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -163,6 +163,7 @@ set(SOURCES\n \tplugins/interfaces/decorate_plugin.cpp\n \tplugins/interfaces/filter_plugin.cpp\n \tplugins/interfaces/io_plugin.cpp\n+        plugins/interfaces/edit_plugin.cpp\n \tplugins/action_searcher.cpp\n \tplugins/meshlab_plugin_type.cpp\n \tplugins/plugin_manager.cpp"
+    },
+    {
+      "sha": "bc55d0767f9dcc0ed16b06d7b53c4d5ea859fa76",
+      "filename": "src/common/plugins/interfaces/edit_plugin.cpp",
+      "status": "added",
+      "additions": 7,
+      "deletions": 0,
+      "changes": 7,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -0,0 +1,7 @@\n+#include \"edit_plugin.h\"\n+\n+void EditPlugin::initGlobalParameterList(RichParameterList& globalparam)\n+{\n+}\n+\n+"
+    },
+    {
+      "sha": "2e08893fa94c1a9d9b4ae78707fb95ac492483fe",
+      "filename": "src/common/plugins/interfaces/edit_plugin.h",
+      "status": "modified",
+      "additions": 14,
+      "deletions": 6,
+      "changes": 20,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fcommon%2Fplugins%2Finterfaces%2Fedit_plugin.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -80,12 +80,12 @@ class EditTool : public MeshLabPluginLogger\n \t\tstartEdit(md, parent, cont);\n \t}\n \n-\tvirtual void decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { decorate(m, parent); }\n+    virtual void decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { decorate(m, parent); }\n \tvirtual void decorate(MeshModel &/*m*/, GLArea * /*parent*/) {}\n \n-\tvirtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *) = 0;\n+    virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *) = 0;\n \tvirtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *) = 0;\n-\tvirtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *) = 0;\n+    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *) = 0;\n \tvirtual void keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *) {}\n \tvirtual void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *) {}\n \tvirtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea *) {}\n@@ -105,10 +105,12 @@ class EditTool : public MeshLabPluginLogger\n class EditPlugin : public MeshLabPlugin\n {\n public:\n-\tEditPlugin() {}\n+    EditPlugin() {}\n \tvirtual ~EditPlugin() {}\n \n-\t//gets a list of actions available from this plugin\n+    virtual void initGlobalParameterList(RichParameterList& defaultGlobalParamSet);\n+\n+    //gets a list of actions available from this plugin\n \tvirtual std::list<QAction *> actions() const {return actionList;};\n \n \t//get the edit tool for the given action\n@@ -117,8 +119,14 @@ class EditPlugin : public MeshLabPlugin\n \t//get the description for the given action\n \tvirtual QString getEditToolDescription(const QAction *) = 0;\n \n+    void setCurrentGlobalParamSet(RichParameterList* cgp)\n+    {\n+        currentGlobalParamSet = cgp;\n+    }\n+\n protected:\n-\tstd::list<QAction*> actionList;\n+    std::list<QAction*> actionList;\n+    RichParameterList* currentGlobalParamSet;\n };\n \n #define EDIT_PLUGIN_IID  \"vcg.meshlab.EditPlugin/1.0\""
+    },
+    {
+      "sha": "f632432bb6f6c6004ac0b18fcbfdea647cefe1c1",
+      "filename": "src/meshlab/mainwindow.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlab%2Fmainwindow.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -113,6 +113,7 @@ class MainWindow : public QMainWindow\n \tstatic bool QCallBack(const int pos, const char * str);\n \t//const QString appName() const {return tr(\"MeshLab v\")+appVer(); }\n \t//const QString appVer() const {return tr(\"1.3.2\"); }\n+    RichParameterList& getCurrentParameterList();\n \tMainWindowSetting mwsettings;\n public slots:\n \t// callback function to execute a filter\n@@ -531,6 +532,9 @@ private slots:\n \tstatic QString getDecoratedFileName(const QString& name);\n \n \tMultiViewer_Container* _currviewcontainer;\n+\n+Q_SIGNALS:\n+    void customSettingsChanged(const RichParameterList &rpl);\n };\n \n /// Event filter that is installed to intercept the open events sent directly by the Operative System"
+    },
+    {
+      "sha": "bee7d6d2bcab35fe26fd031ca4942f526b332fde",
+      "filename": "src/meshlab/mainwindow_Init.cpp",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow_Init.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow_Init.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlab%2Fmainwindow_Init.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -941,6 +941,12 @@ void MainWindow::loadDefaultSettingsFromPlugins()\n \t\t\t}\n \t\t}\n \t}\n+\n+    //edit settings\n+    for (EditPlugin* ep : PM.editPluginFactoryIterator()) {\n+        ep->initGlobalParameterList(defaultGlobalParams);\n+        ep->setCurrentGlobalParamSet(&currentGlobalParams);\n+    }\n }\n \n "
+    },
+    {
+      "sha": "e68c83ddc156b357d4acb161dd6ea91776d160f7",
+      "filename": "src/meshlab/mainwindow_RunTime.cpp",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0,
+      "changes": 23,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow_RunTime.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlab%2Fmainwindow_RunTime.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlab%2Fmainwindow_RunTime.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -104,6 +104,11 @@ void MainWindow::updateCustomSettings()\n {\n \tmwsettings.updateGlobalParameterList(currentGlobalParams);\n \temit dispatchCustomSettings(currentGlobalParams);\n+\n+}\n+RichParameterList& MainWindow::getCurrentParameterList()\n+{\n+    return currentGlobalParams;\n }\n \n void MainWindow::updateWindowMenu()\n@@ -1721,6 +1726,7 @@ void MainWindow::newProject(const QString& projName)\n \tif (gpumeminfo == NULL)\n \t\treturn;\n \n+\n         // The parent of mvcont is set to null, because mdiarea->addSubWindow\n         // will put it into a QMDISubWindow that will take ownership\n \tMultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,nullptr);\n@@ -2196,6 +2202,15 @@ void MainWindow::reloadAllMesh()\n {\n \t// Discards changes and reloads current file\n \t// save current file name\n+\tQMessageBox::StandardButton reply;\n+\treply = QMessageBox::question(\n+\t\tthis,\n+        tr(\"You are reloading all mesh!\"),\n+        tr(\"Are You sure to Reload?\"),\n+\t\tQMessageBox::Yes | QMessageBox::No);\n+\tif (reply == QMessageBox::No) {\n+\t\treturn;\n+\t}\n \tqb->show();\n \tQElapsedTimer t;\n \tt.start();\n@@ -2244,6 +2259,14 @@ void MainWindow::reload()\n \t\treturn;\n \t// Discards changes and reloads current file\n \t// save current file name\n+\tQMessageBox::StandardButton reply;\n+\treply = QMessageBox::question(this,\n+        tr(\"You are reloading the current mesh\"),\n+        tr(\"Are you sure to reload?\"),\n+\t\tQMessageBox::Yes | QMessageBox::No);\n+\tif (reply == QMessageBox::No) {\n+\t\treturn;\n+\t}\n \tqb->show();\n \n \tQString fileName = meshDoc()->mm()->fullName();"
+    },
+    {
+      "sha": "0dc8fccf6862cef423b31157edefb1de02f427dc",
+      "filename": "src/meshlabplugins/decorate_background/decorate_background.cpp",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fdecorate_background%2Fdecorate_background.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fdecorate_background%2Fdecorate_background.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fdecorate_background%2Fdecorate_background.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -144,6 +144,7 @@ void DecorateBackgroundPlugin::decorateDoc(const QAction* a, MeshDocument &m, co\n         {\n             emit this->askViewerShot(\"backGrid\");\n \n+\n             Scalarm scaleBB = parset->getFloat(BoxRatioParam());\n             Scalarm majorTick = fabs(parset->getFloat(GridMajorParam()));\n             Scalarm minorTick = fabs(parset->getFloat(GridMinorParam()));"
+    },
+    {
+      "sha": "850362f37dd5f79e9c5fd0d6ea00592d98bc90f1",
+      "filename": "src/meshlabplugins/edit_align/edit_align_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_align%2Fedit_align_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_align%2Fedit_align_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_align%2Fedit_align_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class EditAlignFactory : public QObject, public EditPlugin\n public:\n \tEditAlignFactory();\n \tvirtual ~EditAlignFactory() { delete editAlign; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n \t"
+    },
+    {
+      "sha": "01930842cf53d0983681b1063e0681e97fb6b403",
+      "filename": "src/meshlabplugins/edit_manipulators/edit_manipulators_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_manipulators%2Fedit_manipulators_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_manipulators%2Fedit_manipulators_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_manipulators%2Fedit_manipulators_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class EditManipulatorsFactory : public QObject, public EditPlugin\n public:\n \tEditManipulatorsFactory();\n \tvirtual ~EditManipulatorsFactory() { delete editManipulators; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "877d5268c5c9d0a88cd029ce3c67fa1989b95d39",
+      "filename": "src/meshlabplugins/edit_measure/edit_measure_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_measure%2Fedit_measure_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_measure%2Fedit_measure_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_measure%2Fedit_measure_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class EditMeasureFactory : public QObject, public EditPlugin\n public:\n \tEditMeasureFactory();\n \tvirtual ~EditMeasureFactory() { delete editMeasure; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "6f7cc886516c5c792116f5732006632341401799",
+      "filename": "src/meshlabplugins/edit_mutualcorrs/edit_mutualcorrs_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_mutualcorrs%2Fedit_mutualcorrs_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_mutualcorrs%2Fedit_mutualcorrs_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_mutualcorrs%2Fedit_mutualcorrs_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -36,6 +36,10 @@ class EditMutualCorrsFactory : public QObject, public EditPlugin\n public:\r\n \tEditMutualCorrsFactory();\r\n \tvirtual ~EditMutualCorrsFactory() { delete editMutualCorrs; }\r\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\r\n+    {\r\n+        // No global parameters needed for this plugin\r\n+    }\r\n \r\n \tvirtual QString pluginName() const;\r\n \r"
+    },
+    {
+      "sha": "cce23fe057ea3d0e87a55a6acefe288eea2976b1",
+      "filename": "src/meshlabplugins/edit_paint/edit_paint.h",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -62,7 +62,7 @@ class EditPaintPlugin : public QObject, public EditTool {\n \tbool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);\n \tvoid endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);\n \tvoid decorate(MeshModel &/*m*/, GLArea * /*parent*/);\n-\tvoid mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n+    void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n \tvoid mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n \tvoid mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n \tvoid tabletEvent(QTabletEvent *, MeshModel &, GLArea *);"
+    },
+    {
+      "sha": "446d3627f15077d29ade7ce204ac6e37752ab7de",
+      "filename": "src/meshlabplugins/edit_paint/edit_paint_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_paint%2Fedit_paint_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class EditPaintFactory : public QObject, public EditPlugin\n public:\n \tEditPaintFactory();\n \tvirtual ~EditPaintFactory() { delete editPaint; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "1d44b0dc76a60d7ca72ba9756a2fc8d1d4cfc490",
+      "filename": "src/meshlabplugins/edit_pickpoints/edit_pickpoints_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_pickpoints%2Fedit_pickpoints_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_pickpoints%2Fedit_pickpoints_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_pickpoints%2Fedit_pickpoints_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class EditPickPointsFactory : public QObject, public EditPlugin\n public:\n \tEditPickPointsFactory();\n \tvirtual ~EditPickPointsFactory() { delete editPickPoints; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "632a0dbbc0de44b5489e87b71cc9e4dcc4d4cc3d",
+      "filename": "src/meshlabplugins/edit_point/edit_point_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_point%2Fedit_point_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_point%2Fedit_point_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_point%2Fedit_point_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class PointEditFactory : public QObject, public EditPlugin\n public:\n \tPointEditFactory();\n \tvirtual ~PointEditFactory() { delete editPoint; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "5c142a2f21b16b7887076e29ece0ff1bd369d80b",
+      "filename": "src/meshlabplugins/edit_quality/edit_quality_factory.h",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_quality%2Fedit_quality_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_quality%2Fedit_quality_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_quality%2Fedit_quality_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,10 @@ class QualityMapperFactory : public QObject, public EditPlugin\n public:\n \tQualityMapperFactory();\n \tvirtual ~QualityMapperFactory() { delete editQuality; }\n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n \n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "aefe1bd0c97b45a26531f3a1a23435c64cb6002b",
+      "filename": "src/meshlabplugins/edit_referencing/edit_referencing_factory.h",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 0,
+      "changes": 5,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_referencing%2Fedit_referencing_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_referencing%2Fedit_referencing_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_referencing%2Fedit_referencing_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -37,6 +37,11 @@ class EditReferencingFactory : public QObject, public EditPlugin\n \tEditReferencingFactory();\n \tvirtual ~EditReferencingFactory() { delete editReferencing; }\n \n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n+\n \tvirtual QString pluginName() const;\n \n \t//get the edit tool for the given action"
+    },
+    {
+      "sha": "efbaa471b5b1549140ea25d8e8d3d614c9789352",
+      "filename": "src/meshlabplugins/edit_sample/edit_sample_factory.h",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 0,
+      "changes": 5,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_sample%2Fedit_sample_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_sample%2Fedit_sample_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_sample%2Fedit_sample_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -38,6 +38,11 @@ class SampleEditFactory : public QObject, public EditPlugin\n \tSampleEditFactory();\n \tvirtual ~SampleEditFactory() { delete editSample; }\n \n+    void initGlobalParameterList(RichParameterList& /*paramList*/)\n+    {\n+        // No global parameters needed for this plugin\n+    }\n+\n \t//returns the name of the plugin\n \tvirtual QString pluginName() const;\n "
+    },
+    {
+      "sha": "66670c71f2850e6cafdd6571af55e633ee958464",
+      "filename": "src/meshlabplugins/edit_select/edit_select.cpp",
+      "status": "modified",
+      "additions": 341,
+      "deletions": 204,
+      "changes": 545,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -22,7 +22,12 @@\n  ****************************************************************************/\n \n #include \"edit_select.h\"\n+#include <wrap/gl/addons.h>\n+\n+#include <meshlab/glarea.h>\n+#include <meshlab/mainwindow.h>\n #include <common/GLExtensionsManager.h>\n+#include <common/plugins/plugin_manager.h>\n #include <wrap/gl/pick.h>\n #include <wrap/qt/device_to_logical.h>\n #include <meshlab/glarea.h>\n@@ -33,8 +38,10 @@\n using namespace std;\n using namespace vcg;\n \n-EditSelectPlugin::EditSelectPlugin(int ConnectedMode) :selectionMode(ConnectedMode) {\n+EditSelectPlugin::EditSelectPlugin(RichParameterList* cgp, int ConnectedMode) :selectionMode(ConnectedMode) {\n \tisDragging = false;\n+    currentGlobalParamSet = cgp;\n+    qApp->installEventFilter(this);\n }\n \n QString EditSelectPlugin::info()\n@@ -62,131 +69,192 @@ void EditSelectPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData\n \n \tdt.set(opts);\n }\n+bool EditSelectPlugin::keyReleaseEventFilter(QObject *obj, QEvent *event)\n+{\n+    if (event->type() == QEvent::KeyRelease && QEvent::KeyPress) {\n+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);\n+        if (m_ref && gla_ref) {\n+            // Check if the released key is the Alt key\n+            if (keyEvent->key() == Qt::Key_Alt) {\n+                keyReleaseEvent(keyEvent, *m_ref, gla_ref);\n+            }\n+        }\n+    }\n+    // Pass the event to the base class event filter\n+    return QObject::eventFilter(obj, event);\n+}\n \n void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)\n {\n-\t// global \"all\" commands\n-\tif (e->key() == Qt::Key_A) // select all\n-\t{\n-\t\tif (areaMode == 0){ // vertices\n-          tri::UpdateSelection<CMeshO>::VertexAll(m.cm);\n-\t\t\tgla->updateSelection(m.id(), true, false);\n-\t\t}\n-\t\telse if (areaMode == 1){ //faces\n-          tri::UpdateSelection<CMeshO>::FaceAll(m.cm);\n-\t\t\tgla->updateSelection(m.id(), false, true);\n-\t\t}\n-\t\tgla->update();\n-        e->accept();\n-\t}\n-\n-\tif (e->key() == Qt::Key_D) // deselect all\n-\t{\n-\t\tif (areaMode == 0){ // vertices\n-          tri::UpdateSelection<CMeshO>::VertexClear(m.cm);\n-\t\t\tgla->updateSelection(m.id(), true, false);\n-\t\t}\n-\t\telse if (areaMode == 1){ //faces\n-          tri::UpdateSelection<CMeshO>::FaceClear(m.cm);\n-\t\t\tgla->updateSelection(m.id(), false, true);\n-\t\t}\n-\t\tgla->update();\n-        e->accept();\n-\t}\n-\n-\tif (e->key() == Qt::Key_I) // invert all\n-\t{\n-\t\tif (areaMode == 0){ // vertices\n-          tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);\n-\t\t\tgla->updateSelection(m.id(), true, false);\n-\t\t}\n-\t\telse if (areaMode == 1){ //faces\n-          tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);\n-\t\t\tgla->updateSelection(m.id(), false, true);\n-\t\t}\n-\t\tgla->update();\n-        e->accept();        \n-\t}\n-\n-\n-\tif (selectionMode == SELECT_AREA_MODE)\n-\t{\n-\t\tif (e->key() == Qt::Key_T) // toggle pick mode\n-\t\t{\n-\t\t\tareaMode = (areaMode + 1) % 2;\n-\t\t\tgla->update();\n-            e->accept();            \n-\t\t}\n-\n-\t\tif (e->key() == Qt::Key_C) // clear Polyline\n-\t\t{\n-\t\t\tselPolyLine.clear();\n-\t\t\tgla->update();\n-            e->accept();            \n-\t\t}\n-\n-\t\tif (e->key() == Qt::Key_Backspace) // remove last point Polyline\n-\t\t{\n-\t\t\tif (selPolyLine.size() > 0)\n-\t\t\t\tselPolyLine.pop_back();\n-\t\t\tgla->update();\n-            e->accept();            \n-\t\t}\n-\n-\t\tif (e->key() == Qt::Key_Q) // add to selection\n-\t\t{\n-\t\t\tdoSelection(m, gla, 0);\n-\t\t\tgla->update();\n+    bool ctrlState = currentGlobalParamSet->getBool(\"MeshLab::Editors::InvertCTRLBehavior\");\n+\n+    // global \"all\" commands\n+    switch (e->key()) {\n+        case Qt::Key_A: // select all\n+            if (areaMode == 0) { // vertices\n+                tri::UpdateSelection<CMeshO>::VertexAll(m.cm);\n+                gla->updateSelection(m.id(), true, false);\n+            } else if (areaMode == 1) { // faces\n+                tri::UpdateSelection<CMeshO>::FaceAll(m.cm);\n+                gla->updateSelection(m.id(), false, true);\n+            }\n+            gla->update();\n             e->accept();\n-\t\t}\n-\n-\t\tif (e->key() == Qt::Key_W) // sub from selection\n-\t\t{\n-\t\t\tdoSelection(m, gla, 1);\n-\t\t\tgla->update();\n+            break;\n+\n+        case Qt::Key_D: // deselect all\n+            if (areaMode == 0) { // vertices\n+                tri::UpdateSelection<CMeshO>::VertexClear(m.cm);\n+                gla->updateSelection(m.id(), true, false);\n+            } else if (areaMode == 1) { // faces\n+                tri::UpdateSelection<CMeshO>::FaceClear(m.cm);\n+                gla->updateSelection(m.id(), false, true);\n+            }\n+            gla->update();\n             e->accept();\n-\t\t}\n-\n-\t\tif (e->key() == Qt::Key_E) // invert selection\n-\t\t{\n-\t\t\tdoSelection(m, gla, 2);\n-\t\t\tgla->update();\n+            break;\n+\n+        case Qt::Key_I: // invert all\n+            if (areaMode == 0) { // vertices\n+                tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);\n+                gla->updateSelection(m.id(), true, false);\n+            } else if (areaMode == 1) { // faces\n+                tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);\n+                gla->updateSelection(m.id(), false, true);\n+            }\n+            gla->update();\n             e->accept();\n-\t\t}\n+            break;\n+\n+        default:\n+            break;\n+    }\n+\n+    if (selectionMode == SELECT_AREA_MODE) {\n+        switch (e->key()) {\n+            case Qt::Key_T: // toggle pick mode\n+                areaMode = (areaMode + 1) % 2;\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            case Qt::Key_C: // clear Polyline\n+                selPolyLine.clear();\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            case Qt::Key_Backspace: // remove last point Polyline\n+                if (selPolyLine.size() > 0)\n+                    selPolyLine.pop_back();\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            case Qt::Key_Q: // add to selection\n+                doSelection(m, gla, 0);\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            case Qt::Key_W: // sub from selection\n+                doSelection(m, gla, 1);\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            case Qt::Key_E: // invert selection\n+                doSelection(m, gla, 2);\n+                gla->update();\n+                e->accept();\n+                break;\n+\n+            default:\n+                break;\n+        }\n         gla->setCursor(QCursor(QPixmap(\":/images/sel_area.png\"), 1, 1));\n-\t}\n-    else\n-    {\n-        gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n-        Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();\n-        if(selectionMode == SELECT_VERT_MODE)\n-        {\n-            if (mod & Qt::ControlModifier)\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n-            else if (mod & Qt::ShiftModifier)\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+    } else {\n+        if (ctrlState){\n+            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+        } else {\n+            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n         }\n-        else\n+        Qt::KeyboardModifiers mod = e->modifiers();\n+        if (e->key() == Qt::Key_Alt)\n         {\n-            if (mod & Qt::AltModifier)\n-            {\n-                if (mod & Qt::ControlModifier)\n-                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus_eye.png\"), 1, 1));\n-                else if (mod & Qt::ShiftModifier)\n-                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus_eye.png\"), 1, 1));\n-                else\n-                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_eye.png\"), 1, 1));\n-            }\n-            else\n-            {\n-                if (mod & Qt::ControlModifier)\n+            if (ctrlState){\n+                if (mod & Qt::ControlModifier){\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                } else if (mod & Qt::ShiftModifier){\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                } else{\n                     gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n-                else if (mod & Qt::ShiftModifier)\n+                }\n+            } else{\n+                if (mod & Qt::ControlModifier){\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                } else if (mod & Qt::ShiftModifier){\n                     gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                } else{\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                }\n             }\n+            e->accept();\n+        }\n+\n+        switch (selectionMode) {\n+            case SELECT_VERT_MODE:\n+                if (ctrlState){\n+                    if (mod & Qt::ControlModifier)\n+                        gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                    else if (mod & Qt::ShiftModifier)\n+                        gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                } else {\n+                    if (mod & Qt::ControlModifier)\n+                        gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                    else if (mod & Qt::ShiftModifier)\n+                        gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                }\n+                break;\n+\n+            default:\n+                if (mod & Qt::AltModifier) {\n+                    if (ctrlState){\n+                        if (mod & Qt::ControlModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                        else if (mod & Qt::ShiftModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                        else\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                    } else {\n+                        if (mod & Qt::ControlModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                        else if (mod & Qt::ShiftModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                        else\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                    }\n+                } else {\n+                    if (ctrlState){\n+                        if (mod & Qt::ControlModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                        else if (mod & Qt::ShiftModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                    } else {\n+                        if (mod & Qt::ControlModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                        else if (mod & Qt::ShiftModifier)\n+                            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                    }\n+                }\n+                break;\n         }\n     }\n-\t\n+    if(ctrlState){\n+            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+        } else {\n+            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+        }\n }\n \n void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)\n@@ -264,110 +332,157 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)\n     \n }\n \n-void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, GLArea *gla)\n+void EditSelectPlugin::keyPressEvent(QKeyEvent *event, MeshModel &m, GLArea *gla)\n {\n-\tif (selectionMode == SELECT_AREA_MODE)\n-\t\treturn;\n+    bool ctrlState = currentGlobalParamSet->getBool(\"MeshLab::Editors::InvertCTRLBehavior\");\n \n-    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n-\tQt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();\n-    if(selectionMode == SELECT_VERT_MODE)\n-    {\n-        if (mod & Qt::ControlModifier)\n-            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n-        else if (mod & Qt::ShiftModifier)\n-            gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n-    }\n-    else\n+    switch (event->key())\n     {\n-        if (mod & Qt::AltModifier)\n+        case Qt::Key_Control:\n         {\n-            if (mod & Qt::ControlModifier)\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus_eye.png\"), 1, 1));\n-            else if (mod & Qt::ShiftModifier)\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus_eye.png\"), 1, 1));\n-            else\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_eye.png\"), 1, 1));\n+            if (ctrlState) {\n+                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+            } else {\n+                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+            }\n+            break;\n         }\n-        else\n+        case Qt::Key_Shift:\n         {\n-            if (mod & Qt::ControlModifier)\n-                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n-            else if (mod & Qt::ShiftModifier)\n+            if (ctrlState) {\n                 gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+            } else {\n+                gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+            }\n+            break;\n+        }\n+        case Qt::Key_Alt:\n+        {\n+            if (ctrlState) {\n+                if (event->modifiers() & Qt::ControlModifier) {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+                } else if (event->modifiers() & Qt::ShiftModifier) {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                } else {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus_eye.png\"), 1, 1));\n+                }\n+            } else {\n+                if (event->modifiers() & Qt::ControlModifier) {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+                } else if (event->modifiers() & Qt::ShiftModifier) {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_minus.png\"), 1, 1));\n+                } else {\n+                    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_eye.png\"), 1, 1));\n+                }\n+            }\n+            break;\n+        }\n+        default:\n+        {\n+            break;\n         }\n     }\n }\n \n void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea *gla)\n {\n-\tif (selectionMode == SELECT_AREA_MODE)\n-\t{\n-\t\tselPolyLine.push_back(QTLogicalToOpenGL(gla, event->pos()));\n-\t\treturn;\n-\t}\n-\n-\tLastSelVert.clear();\n-\tLastSelFace.clear();\n+    bool ctrlState = currentGlobalParamSet->getBool(\"MeshLab::Editors::InvertCTRLBehavior\");\n+    if (selectionMode == SELECT_AREA_MODE)\n+    {\n+        selPolyLine.push_back(QTLogicalToOpenGL(gla, event->pos()));\n+        return;\n+    }\n \n-\tif ((event->modifiers() & Qt::ControlModifier) ||\n-\t\t(event->modifiers() & Qt::ShiftModifier))\n-\t{\n-\t\tCMeshO::FaceIterator fi;\n-\t\tfor (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)\n-\t\t\tif (!(*fi).IsD() && (*fi).IsS())\n-\t\t\t\tLastSelFace.push_back(&*fi);\n-\n-\t\tCMeshO::VertexIterator vi;\n-\t\tfor (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)\n-\t\t\tif (!(*vi).IsD() && (*vi).IsS())\n-\t\t\t\tLastSelVert.push_back(&*vi);\n-\t}\n+    LastSelVert.clear();\n+    LastSelFace.clear();\n+\n+    int ctrl = (event->modifiers() & Qt::ControlModifier) ? 1 : 0;\n+    int shift = (event->modifiers() & Qt::ShiftModifier) ? 1 : 0;\n+    int alt = (event->modifiers() & Qt::AltModifier) ? 1 : 0;\n+\n+    switch (ctrlState * 4 + ctrl * 2 + shift) {\n+        case 0:  // !ctrlState && !ctrl && !shift\n+            composingSelMode = SMClear;\n+            selectFrontFlag = false;\n+            break;\n+        case 1:  // !ctrlState && !ctrl && shift\n+            composingSelMode = SMSub;\n+            selectFrontFlag = false;\n+            break;\n+        case 2:  // !ctrlState && ctrl && !shift\n+            composingSelMode = SMAdd;\n+            selectFrontFlag = false;\n+            break;\n+        case 3:  // !ctrlState && ctrl && shift\n+            composingSelMode = SMSub;\n+            selectFrontFlag = false;\n+            break;\n+        case 4:  // ctrlState && !ctrl && !shift\n+            composingSelMode = SMAdd;\n+            selectFrontFlag = alt;\n+            break;\n+        case 5:  // ctrlState && !ctrl && shift\n+            composingSelMode = SMSub;\n+            selectFrontFlag = alt;\n+            break;\n+        case 6:  // ctrlState && ctrl && !shift\n+            composingSelMode = SMClear;\n+            selectFrontFlag = alt;\n+            break;\n+        case 7:  // ctrlState && ctrl && shift\n+            composingSelMode = SMSub;\n+            selectFrontFlag = alt;\n+            break;\n+    }\n \n-\tcomposingSelMode = SMClear;\n-    if (event->modifiers() & Qt::ControlModifier)\n-\t\tcomposingSelMode = SMAdd;\n-    else if (event->modifiers() & Qt::ShiftModifier)\n-\t\tcomposingSelMode = SMSub;\n+    start = QTLogicalToOpenGL(gla, event->pos());\n+    cur = start;\n \n-\tif (event->modifiers() & Qt::AltModifier)\n-\t\tselectFrontFlag = true;\n-\telse\n-\t\tselectFrontFlag = false;\n+    if (ctrlState && (!(event->modifiers() & Qt::ControlModifier) || (event->modifiers() & Qt::ShiftModifier))) {\n+        for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) {\n+            if (!(*fi).IsD() && (*fi).IsS()) {\n+                LastSelFace.push_back(&*fi);\n+            }\n+        }\n \n-\tstart = QTLogicalToOpenGL(gla, event->pos());\n-\tcur = start;\n-\treturn;\n+        for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {\n+            if (!(*vi).IsD() && (*vi).IsS()) {\n+                LastSelVert.push_back(&*vi);\n+            }\n+        }\n+    }\n }\n \n-void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel & /*m*/, GLArea * gla)\n+\n+\n+void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)\n {\n-\tif (selectionMode == SELECT_AREA_MODE)\n-\t{\n-\t\tselPolyLine.back() = QTLogicalToOpenGL(gla, event->pos());\n-\t}\n-\telse\n-\t{\n-\t\tprev = cur;\n-\t\tcur = QTLogicalToOpenGL(gla, event->pos());\n-\t\tisDragging = true;\n-\t}\n-\tgla->update();\n-\n-\t//    // to avoid too frequent rendering\n-\t//    if(gla->lastRenderingTime() < 200 )\n-\t//    {\n-\t//    }\n-\t//    else{\n-\t//      gla->makeCurrent();\n-\t//      glDrawBuffer(GL_FRONT);\n-\t//      DrawXORRect(gla,true);\n-\t//      glDrawBuffer(GL_BACK);\n-\t//      glFlush();\n-\t//    }\n+    if (selectionMode == SELECT_AREA_MODE)\n+    {\n+        selPolyLine.back() = QTLogicalToOpenGL(gla, event->pos());\n+    }\n+    else\n+    {\n+        prev = cur;\n+        cur = QTLogicalToOpenGL(gla, event->pos());\n+        isDragging = true;\n+    }\n+    gla->update();\n+\n+    //    // to avoid too frequent rendering\n+    //    if(gla->lastRenderingTime() < 200 )\n+    //    {\n+    //    }\n+    //    else{\n+    //      gla->makeCurrent();\n+    //      glDrawBuffer(GL_FRONT);\n+    //      DrawXORRect(gla,true);\n+    //      glDrawBuffer(GL_BACK);\n+    //      glFlush();\n+    //    }\n }\n \n-void EditSelectPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)\n+void EditSelectPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)\n {\n \t//gla->update();\n \tif (gla == NULL)\n@@ -481,6 +596,7 @@ void EditSelectPlugin::DrawXORRect(GLArea * gla, bool doubleDraw)\n \n void EditSelectPlugin::decorate(MeshModel &m, GLArea * gla)\n {\n+    bool ctrlState = currentGlobalParamSet->getBool(\"MeshLab::Editors::InvertCTRLBehavior\");\n \tif (selectionMode == SELECT_AREA_MODE)\n \t{\n \t\t// get proj data of last rendering\n@@ -522,17 +638,31 @@ void EditSelectPlugin::decorate(MeshModel &m, GLArea * gla)\n \t}\n \telse\n \t{\n-\t\tQString line1, line2, line3;\n+        if (ctrlState){\n+            QString line1, line2, line3;\n \n-\t\tline1 = \"Drag to select\";\n-\t\tif ((selectionMode == SELECT_FACE_MODE) || (selectionMode == SELECT_CONN_MODE))\n-\t\t\tline2 = \"you may hold:<br>- CTRL to add<br>- SHIFT to subtract<br>- ALT to select only visible\";\n-\t\telse\n-\t\t\tline2 = \"you may hold:<br>- CTRL to add<br>- SHIFT to subtract\";\n-\t\tline3 = \"<br>A select all, D de-select all, I invert all\";\n+            line1 = \"Drag to select\";\n+            if ((selectionMode == SELECT_FACE_MODE) || (selectionMode == SELECT_CONN_MODE))\n+                line2 = \"you may hold:<br>- CTRL to NEW selection<br>- SHIFT to subtract<br>- ALT to select only visible\";\n+            else\n+            line2 = \"you may hold:<br>- CTRL to NEW selection<br>- SHIFT to subtract\";\n+            line3 = \"<br>A select all, D de-select all, I invert all\";\n \n-\t\tthis->realTimeLog(\"Interactive Selection\", m.shortName(), \"%s<br>%s<br>%s\", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());\n-\t}\n+            this->realTimeLog(\"Interactive Selection\", m.shortName(), \"%s<br>%s<br>%s\", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());\n+        }\n+        else{\n+            QString line1, line2, line3;\n+\n+            line1 = \"Drag to select\";\n+            if ((selectionMode == SELECT_FACE_MODE) || (selectionMode == SELECT_CONN_MODE))\n+               line2 = \"you may hold:<br>- CTRL to add<br>- SHIFT to subtract<br>- ALT to select only visible\";\n+            else\n+            line2 = \"you may hold:<br>- CTRL to add<br>- SHIFT to subtract\";\n+            line3 = \"<br>A select all, D de-select all, I invert all\";\n+\n+            this->realTimeLog(\"Interactive Selection\", m.shortName(), \"%s<br>%s<br>%s\", line1.toStdString().c_str(), line2.toStdString().c_str(), line3.toStdString().c_str());\n+        }\n+    }\n \n \tif (isDragging)\n \t{\n@@ -629,11 +759,18 @@ void EditSelectPlugin::decorate(MeshModel &m, GLArea * gla)\n \n bool EditSelectPlugin::startEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)\n {\n+    bool ctrlState = currentGlobalParamSet->getBool(\"MeshLab::Editors::InvertCTRLBehavior\");\n \tif (gla == NULL)\n \t\treturn false;\n \tif (!GLExtensionsManager::initializeGLextensions_notThrowing())\n \t\treturn false;\n-\tgla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+    if (ctrlState){\n+    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect_plus.png\"), 1, 1));\n+    }\n+    else{\n+    gla->setCursor(QCursor(QPixmap(\":/images/sel_rect.png\"), 1, 1));\n+    }\n+\n \n \tif (selectionMode == SELECT_AREA_MODE)\n \t{"
+    },
+    {
+      "sha": "8ee94b5c6f0f7130e0c68f665d3e75c367fcec14",
+      "filename": "src/meshlabplugins/edit_select/edit_select.h",
+      "status": "modified",
+      "additions": 22,
+      "deletions": 15,
+      "changes": 37,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -24,29 +24,32 @@\n #define EDITPLUGIN_H\n \n #include <common/plugins/interfaces/edit_plugin.h>\n+#include <meshlab/dialogs/setting_dialog.h>\n+#include <QObject>\n \n class EditSelectPlugin : public QObject, public EditTool\n {\n \tQ_OBJECT\n \n-\n public:\n-\tenum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE, SELECT_AREA_MODE };\n \n-\tEditSelectPlugin(int _ConnectedMode);\n+\tenum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE, SELECT_AREA_MODE };\n \n+    EditSelectPlugin(RichParameterList* cgp, int _ConnectedMode);\n \tvirtual ~EditSelectPlugin() {}\n-\n \tstatic QString info();\n-\tvoid suggestedRenderingData(MeshModel & m, MLRenderingData& dt);\n-\tbool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);\n-\tvoid endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}\n-\tvoid decorate(MeshModel &/*m*/, GLArea * /*parent*/);\n-\tvoid mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n-\tvoid mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n-\tvoid mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);\n-\tvoid keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);\n-\tvoid keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);\n+    void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);\n+    bool startEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);\n+    void endEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}\n+    void decorate(MeshModel &/*m*/, GLArea * /*parent*/);\n+    void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *gla);\n+    void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *gla);\n+    void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *gla);\n+    virtual void keyReleaseEvent(QKeyEvent *, MeshModel &m, GLArea *gla);\n+    void keyPressEvent(QKeyEvent *, MeshModel &m, GLArea *gla);\n+    EditTool* getEditTool(const QAction *action);\n+    bool keyReleaseEventFilter(QObject *obj, QEvent *event);\n+\n \n \tvcg::Point2f start;\n \tvcg::Point2f cur;\n@@ -71,12 +74,16 @@ class EditSelectPlugin : public QObject, public EditTool\n \tvoid setDecorator(QString, bool);\n \n private:\n+    MeshModel *m_ref;\n+    GLArea *gla_ref;\n+    RichParameterList* currentGlobalParamSet;\n+    bool ctrlState;\n \ttypedef enum { SMAdd, SMClear, SMSub } ComposingSelMode; // How the selection are composed\n-\tComposingSelMode composingSelMode;\n+    ComposingSelMode composingSelMode;\n \tbool selectFrontFlag;\n \tvoid DrawXORRect(GLArea * gla, bool doubleDraw);\n \tvoid DrawXORPolyLine(GLArea * gla);\n \tvoid doSelection(MeshModel &m, GLArea *gla, int mode);\n-};\n \n+};\n #endif"
+    },
+    {
+      "sha": "e9173bf45597f726b163df80e6f2bc5da6f75477",
+      "filename": "src/meshlabplugins/edit_select/edit_select_factory.cpp",
+      "status": "modified",
+      "additions": 45,
+      "deletions": 10,
+      "changes": 55,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.cpp",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.cpp",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.cpp?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -23,6 +23,7 @@\n \n #include \"edit_select_factory.h\"\n #include \"edit_select.h\"\n+#include \"common/parameters/rich_parameter_list.h\"\n \n EditSelectFactory::EditSelectFactory()\n {\n@@ -39,26 +40,60 @@ EditSelectFactory::EditSelectFactory()\n \tforeach(QAction *editAction, actionList)\n \t\teditAction->setCheckable(true); \t\n }\n+void EditSelectFactory::initGlobalParameterList(RichParameterList& defaultGlobalParamSet) {\n+    defaultGlobalParamSet.addParam(RichBool(InvertCtrlBehavior(), true,\"Inverting the behavior of the CTRL modifier on edit selec rectangle tools\",\"\"));\n+}\n \n QString EditSelectFactory::pluginName() const\n {\n \treturn \"EditSelect\";\n }\n \n+//TODO - same as under this lines but better\n+//EditTool* EditSelectFactory::getEditTool(const QAction *action, MainWindow *mainWindow)\n+//{\n+//    static EditSelectPlugin selectFaceMode(EditSelectPlugin::SELECT_FACE_MODE);\n+//    static EditSelectPlugin selectConnMode(EditSelectPlugin::SELECT_CONN_MODE);\n+//    static EditSelectPlugin selectVertMode(EditSelectPlugin::SELECT_VERT_MODE);\n+//    static EditSelectPlugin selectAreaMode(EditSelectPlugin::SELECT_AREA_MODE);\n+\n+//    EditSelectPlugin* result = nullptr;\n+//    if(action == editSelect)\n+//        result = &selectFaceMode;\n+//    else if(action == editSelectConnected)\n+//        result = &selectConnMode;\n+//    else if(action == editSelectVert)\n+//        result = &selectVertMode;\n+//    else if (action == editSelectArea)\n+//        result = &selectAreaMode;\n+\n+//    QObject::connect(mainWindow, SIGNAL(dispatchCustomSettings()), result, SLOT(updateCustomSettingValues()));\n+\n+//    if (result == nullptr) {\n+//        assert(0);\n+//    }\n+\n+//    return static_cast<EditTool*>(result);\n+//}\n+\n //get the edit tool for the given action\n EditTool* EditSelectFactory::getEditTool(const QAction *action)\n {\n-\tif(action == editSelect)\n-\t\treturn new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);\n-\telse if(action == editSelectConnected)\n-\t\treturn new EditSelectPlugin(EditSelectPlugin::SELECT_CONN_MODE);\n-\telse if(action == editSelectVert)\n-\t\treturn new EditSelectPlugin(EditSelectPlugin::SELECT_VERT_MODE);\n-\telse if (action == editSelectArea)\n-\t\treturn new EditSelectPlugin(EditSelectPlugin::SELECT_AREA_MODE);\n+    EditSelectPlugin* result = nullptr;\n+    if(action == editSelect)\n+        result = new EditSelectPlugin(currentGlobalParamSet,EditSelectPlugin::SELECT_FACE_MODE);\n+    else if(action == editSelectConnected)\n+        result = new EditSelectPlugin(currentGlobalParamSet,EditSelectPlugin::SELECT_CONN_MODE);\n+    else if(action == editSelectVert)\n+        result = new EditSelectPlugin(currentGlobalParamSet,EditSelectPlugin::SELECT_VERT_MODE);\n+    else if (action == editSelectArea)\n+        result = new EditSelectPlugin(currentGlobalParamSet,EditSelectPlugin::SELECT_AREA_MODE);\n+\n+    if (result == nullptr) {\n+        assert(0);\n+    }\n \n-\tassert(0); //should never be asked for an action that isn't here\n-\treturn nullptr;\n+    return (EditTool*)result;\n }\n \n QString EditSelectFactory::getEditToolDescription(const QAction * /*a*/)"
+    },
+    {
+      "sha": "2b4c49762e10ca4e3f038ff119fb2a7c2af70f3d",
+      "filename": "src/meshlabplugins/edit_select/edit_select_factory.h",
+      "status": "modified",
+      "additions": 10,
+      "deletions": 0,
+      "changes": 10,
+      "blob_url": "https://github.com/cnr-isti-vclab/meshlab/blob/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.h",
+      "raw_url": "https://github.com/cnr-isti-vclab/meshlab/raw/c3969486de1dfabbfc0d3b975866c7a6a37afc00/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.h",
+      "contents_url": "https://api.github.com/repos/cnr-isti-vclab/meshlab/contents/src%2Fmeshlabplugins%2Fedit_select%2Fedit_select_factory.h?ref=c3969486de1dfabbfc0d3b975866c7a6a37afc00",
+      "patch": "@@ -26,6 +26,7 @@\n #define EditSelectFactoryPLUGIN_H\n \n #include <common/plugins/interfaces/edit_plugin.h>\n+#include \"common/parameters/rich_parameter_list.h\"\n \n class EditSelectFactory : public QObject, public EditPlugin\n {\n@@ -37,6 +38,8 @@ class EditSelectFactory : public QObject, public EditPlugin\n \tEditSelectFactory();\n \tvirtual ~EditSelectFactory() { delete editSelect; }\n \n+    virtual void initGlobalParameterList(RichParameterList& defaultGlobalParamSet);\n+\n \tvirtual QString pluginName() const;\n \n \t//get the edit tool for the given action\n@@ -45,7 +48,14 @@ class EditSelectFactory : public QObject, public EditPlugin\n \t//get the description for the given action\n \tvirtual QString getEditToolDescription(const QAction*);\n \n+    inline QString InvertCtrlBehavior() const { return  \"MeshLab::Editors::InvertCTRLBehavior\" ; }\n+\n+\n+signals:\n+    void setDecorator(QString, bool);\n+\n private:\n+    bool ctrlState;\n \tQAction *editSelect;\n \tQAction *editSelectVert;\n \tQAction *editSelectConnected;"
+    }
+  ]
+}
