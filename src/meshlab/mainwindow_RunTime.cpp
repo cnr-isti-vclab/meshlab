@@ -793,6 +793,88 @@ void MainWindow::showTooltip(QAction* q)
 }
 
 // /////////////////////////////////////////////////
+// Undo / Redo
+// /////////////////////////////////////////////////
+
+void MainWindow::pushUndoForCurrentMesh(const QString& desc)
+{
+	if (meshDoc() != nullptr && meshDoc()->mm() != nullptr)
+		undoStack.pushUndo(*meshDoc()->mm(), desc);
+}
+
+void MainWindow::meshUndo()
+{
+	if (!undoStack.canUndo()) return;
+	if (meshDoc() == nullptr || meshDoc()->mm() == nullptr) return;
+
+	int restoredId = undoStack.undo(*meshDoc());
+	if (restoredId < 0) return;
+
+	MeshModel* mm = meshDoc()->getMesh(restoredId);
+	if (mm == nullptr) return;
+
+	vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc != nullptr) {
+		MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+		if (shared != nullptr) {
+			MLRenderingData::RendAtts atts;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = true;
+			shared->meshAttributesUpdated(restoredId, true, atts);
+			shared->manageBuffers(restoredId);
+		}
+	}
+
+	if (GLA()) {
+		GLA()->updateAllSiblingsGLAreas();
+		GLA()->update();
+	}
+	updateLayerDialog();
+	MainWindow::globalStatusBar()->showMessage("Undo", 2000);
+}
+
+void MainWindow::meshRedo()
+{
+	if (!undoStack.canRedo()) return;
+	if (meshDoc() == nullptr || meshDoc()->mm() == nullptr) return;
+
+	int restoredId = undoStack.redo(*meshDoc());
+	if (restoredId < 0) return;
+
+	MeshModel* mm = meshDoc()->getMesh(restoredId);
+	if (mm == nullptr) return;
+
+	vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc != nullptr) {
+		MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+		if (shared != nullptr) {
+			MLRenderingData::RendAtts atts;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+			atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = true;
+			shared->meshAttributesUpdated(restoredId, true, atts);
+			shared->manageBuffers(restoredId);
+		}
+	}
+
+	if (GLA()) {
+		GLA()->updateAllSiblingsGLAreas();
+		GLA()->update();
+	}
+	updateLayerDialog();
+	MainWindow::globalStatusBar()->showMessage("Redo", 2000);
+}
+
+// /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
 // /////////////////////////////////////////////////
 // It is split in two part
@@ -1085,6 +1167,8 @@ void MainWindow::executeFilter(
 	try {
 		meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
+		if (!isPreview && meshDoc()->mm() != nullptr)
+			undoStack.pushUndo(*meshDoc()->mm(), action->text());
 		unsigned int postCondMask = MeshModel::MM_UNKNOWN;
 		iFilter->applyFilter(action, mergedenvironment, *(meshDoc()), postCondMask, QCallBack);
 		if (postCondMask == MeshModel::MM_UNKNOWN)

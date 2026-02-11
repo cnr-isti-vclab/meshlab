@@ -38,6 +38,7 @@
 #include "dialogs/filter_dock_dialog.h"
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"
+#include "mesh_undo_stack.h"
 
 #include <QDir>
 #include <QMainWindow>
@@ -126,6 +127,11 @@ signals:
 protected:
 	void showEvent(QShowEvent *event);
 
+public slots:
+	void meshUndo();
+	void meshRedo();
+	void pushUndoForCurrentMesh(const QString& desc);
+
 private slots:
 	void newProject(const QString& projName = QString());
 	void saveProject();
@@ -163,6 +169,7 @@ private slots:
 	void updateProgressBar(const int pos,const QString& text);
 	void updateTexture(int meshid);
 public:
+	MeshUndoStack undoStack;
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 
@@ -425,6 +432,10 @@ private:
 	QShortcut* searchShortCut;
 	MyToolButton* searchButton;
 	SearchMenu* searchMenu;
+
+	//////////// Actions Menu Edit ///////////////////////
+	QAction* undoAct;
+	QAction* redoAct;
 
 	//////////// Actions Menu File ///////////////////////
 	QAction* newProjectAct;
