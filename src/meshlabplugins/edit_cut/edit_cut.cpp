@@ -308,6 +308,11 @@ void EditCutPlugin::executeCut(MeshModel &m, GLArea *gla)
 	if (cutPolyLine.size() < 3)
 		return;
 
+	// Use Qt meta-object system to call MainWindow's undo slot without linking to exe
+	QWidget* mainWin = gla->window();
+	if (mainWin)
+		QMetaObject::invokeMethod(mainWin, "pushUndoForCurrentMesh", Q_ARG(QString, QString("Lasso Cut")));
+
 	try {
 
 	int numPolySeg = (int)cutPolyLine.size();

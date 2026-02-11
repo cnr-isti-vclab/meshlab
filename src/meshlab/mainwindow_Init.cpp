@@ -315,6 +315,16 @@ connectRenderModeActionList(rendlist);*/
 	connect(showRasterAct, SIGNAL(triggered()), this, SLOT(showRaster()));
 
 	//////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
+	undoAct = new QAction(tr("Undo"), this);
+	undoAct->setShortcut(QKeySequence::Undo);
+	undoAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(undoAct, SIGNAL(triggered()), this, SLOT(meshUndo()));
+
+	redoAct = new QAction(tr("Redo"), this);
+	redoAct->setShortcut(QKeySequence::Redo);
+	redoAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(redoAct, SIGNAL(triggered()), this, SLOT(meshRedo()));
+
 	suspendEditModeAct = new QAction(QIcon(":/images/no_edit.png"), tr("Not editing"), this);
 	suspendEditModeAct->setShortcut(Qt::Key_Escape);
 	suspendEditModeAct->setCheckable(true);
@@ -869,6 +879,9 @@ void MainWindow::fillShadersMenu()
 void MainWindow::fillEditMenu()
 {
 	clearMenu(editMenu);
+	editMenu->addAction(undoAct);
+	editMenu->addAction(redoAct);
+	editMenu->addSeparator();
 	editMenu->addAction(suspendEditModeAct);
 	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator())
 	{
@@ -885,7 +898,7 @@ void MainWindow::clearMenu(QMenu* menu)
 	for (QAction *action : menu->actions()) {
 		if (action->menu()) {
 			clearMenu(action->menu());
-		} else if (!action->isSeparator() && !(action==suspendEditModeAct)){
+		} else if (!action->isSeparator() && action != suspendEditModeAct && action != undoAct && action != redoAct){
 			disconnect(action, SIGNAL(triggered()), 0, 0);
 		}
 	}
