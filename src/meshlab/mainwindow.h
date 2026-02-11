@@ -374,6 +374,7 @@ private:
 	QToolBar* decoratorToolBar;
 	QToolBar* editToolBar;
 	QToolBar* filterToolBar;
+	QToolBar* dynartToolBar;
 	QToolBar* searchToolBar;
 	MLRenderingGlobalToolbar* globrendtoolbar;
 	///////// Menus ///////////////
