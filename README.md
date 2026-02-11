@@ -19,6 +19,17 @@ This change applies to all rectangle-based selection tools: **Select Faces**, **
 ### Global Parameter System for Edit Plugins
 Edit plugins now support persistent global parameters through the MeshLab settings system. This allows edit tools to expose user-configurable options that are saved across sessions. The `EditPlugin` base class provides `initGlobalParameterList` and `setCurrentGlobalParamSet` for any plugin to register its own settings.
 
+### Lasso Cut Tool (`edit_cut`)
+A new editing tool that draws a closed polyline to cut through mesh triangles and select the inside region:
+- **Click** to add polyline points
+- **Q** — cut edges along the polyline and add inside faces to selection
+- **W** — subtract inside faces from selection
+- **D** / **A** / **I** — deselect all / select all / invert selection
+- **Delete** — delete selected faces (uses MeshLab's standard filter with full undo/redo support)
+- **C** — clear polyline, **Backspace** — undo last point, **Escape** — clear polyline
+
+The tool appears in its own **Dynart Tools** toolbar section, separate from the standard Edit toolbar.
+
 ### Reload Confirmation Dialogs
 Added confirmation prompts before reloading meshes (`Reload` and `Reload All`) to prevent accidental loss of unsaved work.
 
