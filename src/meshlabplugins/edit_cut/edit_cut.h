@@ -29,9 +29,6 @@ private:
 	// Polyline state
 	std::vector<vcg::Point2f> cutPolyLine;
 
-	// Two-phase state: false = drawing, true = previewing selection
-	bool hasPendingSelection;
-
 	// Projection data
 	GLdouble mvMatrix_f[16];
 	GLdouble prMatrix_f[16];
@@ -45,7 +42,6 @@ private:
 	// Core algorithm
 	void executeCut(MeshModel &m, GLArea *gla);
 	void selectInsideFaces(MeshModel &m, GLArea *gla);
-	void deleteSelectedFaces(MeshModel &m, GLArea *gla);
 };
 
 #endif

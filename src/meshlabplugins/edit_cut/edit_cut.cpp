@@ -5,10 +5,6 @@
 #include <wrap/qt/device_to_logical.h>
 #include <meshlab/glarea.h>
 #include <common/GLExtensionsManager.h>
-#include <vcg/complex/algorithms/clean.h>
-#include <vcg/complex/algorithms/update/topology.h>
-#include <vcg/complex/algorithms/update/normal.h>
-#include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/selection.h>
 
 #include <QImage>
@@ -90,7 +86,6 @@ static inline bool SegSegIntersect(
 
 EditCutPlugin::EditCutPlugin()
 {
-	hasPendingSelection = false;
 	memset(viewpSize, 0, sizeof(viewpSize));
 	memset(mvMatrix_f, 0, sizeof(mvMatrix_f));
 	memset(prMatrix_f, 0, sizeof(prMatrix_f));
@@ -126,43 +121,33 @@ bool EditCutPlugin::startEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDat
 
 	gla->setCursor(Qt::CrossCursor);
 	cutPolyLine.clear();
-	hasPendingSelection = false;
 	cutLog("startEdit OK");
 	return true;
 }
 
-void EditCutPlugin::endEdit(MeshModel &m, GLArea * /*parent*/, MLSceneGLSharedDataContext * /*cont*/)
+void EditCutPlugin::endEdit(MeshModel & /*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext * /*cont*/)
 {
 	cutPolyLine.clear();
-	hasPendingSelection = false;
-	tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
 }
 
 // ---- Mouse Events ----
 
 void EditCutPlugin::mousePressEvent(QMouseEvent *event, MeshModel &m, GLArea *gla)
 {
-	if (hasPendingSelection) {
-		// Cancel pending selection if user clicks again
-		hasPendingSelection = false;
-		tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
-		cutPolyLine.clear();
-		gla->updateSelection(m.id(), false, true);
-	}
 	cutPolyLine.push_back(QTLogicalToOpenGL(gla, event->pos()));
 	gla->update();
 }
 
 void EditCutPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea *gla)
 {
-	if (!cutPolyLine.empty() && !hasPendingSelection)
+	if (!cutPolyLine.empty())
 		cutPolyLine.back() = QTLogicalToOpenGL(gla, event->pos());
 	gla->update();
 }
 
 void EditCutPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea *gla)
 {
-	if (!cutPolyLine.empty() && !hasPendingSelection)
+	if (!cutPolyLine.empty())
 		cutPolyLine.back() = QTLogicalToOpenGL(gla, event->pos());
 }
 
@@ -234,7 +219,7 @@ void EditCutPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 						if (bufQImg.pixel(px, py) == blk)
 							m.cm.face[fi].ClearS();
 					}
-					cutPolyLine.clear();
+					// Polyline stays visible
 					gla->updateSelection(m.id(), false, true);
 					gla->update();
 				}
@@ -245,8 +230,6 @@ void EditCutPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		case Qt::Key_D: // Deselect all (like edit_select D)
 			cutLog("Key D - deselect all");
 			tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
-			hasPendingSelection = false;
-			cutPolyLine.clear();
 			gla->updateSelection(m.id(), false, true);
 			gla->update();
 			e->accept();
@@ -255,7 +238,6 @@ void EditCutPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		case Qt::Key_A: // Select all faces
 			cutLog("Key A - select all");
 			tri::UpdateSelection<CMeshO>::FaceAll(m.cm);
-			hasPendingSelection = true;
 			gla->updateSelection(m.id(), false, true);
 			gla->update();
 			e->accept();
@@ -264,35 +246,14 @@ void EditCutPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		case Qt::Key_I: // Invert selection
 			cutLog("Key I - invert selection");
 			tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);
-			hasPendingSelection = true;
 			gla->updateSelection(m.id(), false, true);
 			gla->update();
 			e->accept();
 			break;
 
-		case Qt::Key_Return: // Confirm deletion of selected faces
-		case Qt::Key_Enter:
-			if (hasPendingSelection) {
-				cutLog("Key ENTER - deleting selected faces");
-				deleteSelectedFaces(m, gla);
-			}
-			e->accept();
-			break;
-
-		case Qt::Key_Delete: // Also confirm deletion
-			if (hasPendingSelection) {
-				cutLog("Key DELETE - deleting selected faces");
-				deleteSelectedFaces(m, gla);
-			}
-			e->accept();
-			break;
-
-		case Qt::Key_Escape: // Cancel everything
-			cutLog("Key ESC - cancel all");
+		case Qt::Key_Escape: // Clear polyline only (D=deselect, Delete=delete selected)
+			cutLog("Key ESC - clearing polyline");
 			cutPolyLine.clear();
-			hasPendingSelection = false;
-			tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
-			gla->updateSelection(m.id(), false, true);
 			gla->update();
 			e->accept();
 			break;
@@ -316,30 +277,24 @@ void EditCutPlugin::decorate(MeshModel &m, GLArea *gla)
 
 	DrawXORPolyLine(gla);
 
-	if (hasPendingSelection) {
-		this->realTimeLog("Lasso Cut", m.shortName(),
-			"<b>Selection preview</b><br>"
-			"Q=add to selection, W=subtract, D=deselect all, I=invert<br>"
-			"<b>ENTER=confirm deletion</b>, ESC=cancel");
-	} else {
-		QString line3;
-		if (cutPolyLine.size() < 3)
-			line3 = "Need at least 3 points";
-		else
-			line3 = "<b>Q=cut and select</b>";
+	QString line2;
+	if (cutPolyLine.size() < 3)
+		line2 = "Need at least 3 points";
+	else
+		line2 = "<b>Q=cut and select</b>, W=subtract";
 
-		this->realTimeLog("Lasso Cut", m.shortName(),
-			"Lasso Cut Tool v3 — click to add points<br>"
-			"C=clear, BACKSPACE=undo, ESC=cancel<br>%s",
-			line3.toStdString().c_str());
-	}
+	this->realTimeLog("Lasso Cut", m.shortName(),
+		"Click to add points — C=clear, BACKSPACE=undo, ESC=cancel<br>"
+		"%s<br>"
+		"D=deselect all, A=select all, I=invert — <b>DELETE=delete selected</b>",
+		line2.toStdString().c_str());
 }
 
 // ---- DrawXORPolyLine ----
 
 void EditCutPlugin::DrawXORPolyLine(GLArea *gla)
 {
-	if (cutPolyLine.empty() || hasPendingSelection)
+	if (cutPolyLine.empty())
 		return;
 
 	glMatrixMode(GL_PROJECTION);
@@ -593,17 +548,14 @@ void EditCutPlugin::executeCut(MeshModel &m, GLArea *gla)
 	cutLog("Step 5: Selecting inside faces (preview)...");
 	selectInsideFaces(m, gla);
 
-	hasPendingSelection = true;
-	cutLog("=== executeCut DONE - awaiting confirmation ===");
+	cutLog("=== executeCut DONE ===");
 
 	} catch (std::exception &e) {
 		cutLogQ(QString("EXCEPTION: %1").arg(e.what()));
 		cutPolyLine.clear();
-		hasPendingSelection = false;
 	} catch (...) {
 		cutLog("UNKNOWN EXCEPTION caught");
 		cutPolyLine.clear();
-		hasPendingSelection = false;
 	}
 }
 
@@ -683,8 +635,7 @@ void EditCutPlugin::selectInsideFaces(MeshModel &m, GLArea *gla)
 
 	cutLogQ(QString("  Selected %1 new faces (added to existing selection)").arg(selectedCount));
 
-	// Clear polyline so user can draw a new one for additional selection
-	cutPolyLine.clear();
+	// Polyline stays visible — user can add more points and press Q again
 
 	// Tell MeshLab to update the selection display
 	gla->updateSelection(m.id(), false, true);
@@ -693,80 +644,3 @@ void EditCutPlugin::selectInsideFaces(MeshModel &m, GLArea *gla)
 	cutLog("  selectInsideFaces DONE");
 }
 
-// ========================================================================
-// Phase 2: Delete selected faces and clean up
-// ========================================================================
-
-void EditCutPlugin::deleteSelectedFaces(MeshModel &m, GLArea *gla)
-{
-	cutLog(">>> deleteSelectedFaces START <<<");
-
-	try {
-
-	// Count and delete selected faces
-	int deletedCount = 0;
-	for (size_t fi = 0; fi < m.cm.face.size(); ++fi)
-	{
-		if (!m.cm.face[fi].IsD() && m.cm.face[fi].IsS()) {
-			tri::Allocator<CMeshO>::DeleteFace(m.cm, m.cm.face[fi]);
-			deletedCount++;
-		}
-	}
-	cutLogQ(QString("  Deleted %1 faces").arg(deletedCount));
-
-	// Clean up
-	cutLog("  RemoveUnreferencedVertex...");
-	tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	cutLog("  CompactEveryVector...");
-	tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
-
-	// Update normals and bounding box (skip FaceFace to avoid Missing Component)
-	cutLog("  UpdateNormal...");
-	tri::UpdateNormal<CMeshO>::PerFaceNormalized(m.cm);
-	tri::UpdateNormal<CMeshO>::PerVertexNormalized(m.cm);
-	cutLog("  UpdateBounding...");
-	tri::UpdateBounding<CMeshO>::Box(m.cm);
-
-	// Only update FaceFace topology if the mesh already has it enabled
-	if (tri::HasFFAdjacency(m.cm)) {
-		cutLog("  UpdateTopology::FaceFace (mesh has FFAdj)...");
-		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	} else {
-		cutLog("  Skipping FaceFace (mesh does not have FFAdj)");
-	}
-
-	cutLog("  Notifying MeshLab rendering system...");
-
-	// Force GPU buffer rebuild (same pattern as edit_paint)
-	if (gla->mvc() != NULL) {
-		MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
-		if (shared != NULL) {
-			MLRenderingData::RendAtts atts;
-			atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-			atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-			atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
-			shared->meshAttributesUpdated(m.id(), true, atts);
-			shared->manageBuffers(m.id());
-			cutLog("  GPU buffers rebuilt");
-		}
-	}
-
-	cutLogQ(QString("  Final mesh: %1 verts, %2 faces").arg(m.cm.vert.size()).arg(m.cm.face.size()));
-
-	cutPolyLine.clear();
-	hasPendingSelection = false;
-
-	gla->updateAllSiblingsGLAreas();
-	gla->update();
-	cutLog("=== deleteSelectedFaces DONE ===");
-
-	} catch (std::exception &e) {
-		cutLogQ(QString("EXCEPTION in delete: %1").arg(e.what()));
-		cutPolyLine.clear();
-		hasPendingSelection = false;
-	} catch (...) {
-		cutLog("UNKNOWN EXCEPTION in delete");
-		cutPolyLine.clear();
-		hasPendingSelection = false;
-	}
-}
