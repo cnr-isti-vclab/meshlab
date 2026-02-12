@@ -38,6 +38,7 @@
 #include "dialogs/filter_dock_dialog.h"
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"
+#include "mesh_undo_stack.h"
 
 #include <QDir>
 #include <QMainWindow>
@@ -113,6 +114,7 @@ public:
 	static bool QCallBack(const int pos, const char * str);
 	//const QString appName() const {return tr("MeshLab v")+appVer(); }
 	//const QString appVer() const {return tr("1.3.2"); }
+	RichParameterList& getCurrentParameterList();
 	MainWindowSetting mwsettings;
 public slots:
 	// callback function to execute a filter
@@ -124,6 +126,11 @@ signals:
 
 protected:
 	void showEvent(QShowEvent *event);
+
+public slots:
+	void meshUndo();
+	void meshRedo();
+	void pushUndoForCurrentMesh(const QString& desc);
 
 private slots:
 	void newProject(const QString& projName = QString());
@@ -162,6 +169,7 @@ private slots:
 	void updateProgressBar(const int pos,const QString& text);
 	void updateTexture(int meshid);
 public:
+	MeshUndoStack undoStack;
 
 	bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
 
@@ -373,6 +381,7 @@ private:
 	QToolBar* decoratorToolBar;
 	QToolBar* editToolBar;
 	QToolBar* filterToolBar;
+	QToolBar* dynartToolBar;
 	QToolBar* searchToolBar;
 	MLRenderingGlobalToolbar* globrendtoolbar;
 	///////// Menus ///////////////
@@ -423,6 +432,10 @@ private:
 	QShortcut* searchShortCut;
 	MyToolButton* searchButton;
 	SearchMenu* searchMenu;
+
+	//////////// Actions Menu Edit ///////////////////////
+	QAction* undoAct;
+	QAction* redoAct;
 
 	//////////// Actions Menu File ///////////////////////
 	QAction* newProjectAct;
@@ -531,6 +544,9 @@ private:
 	static QString getDecoratedFileName(const QString& name);
 
 	MultiViewer_Container* _currviewcontainer;
+
+Q_SIGNALS:
+	void customSettingsChanged(const RichParameterList &rpl);
 };
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System

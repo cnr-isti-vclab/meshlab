@@ -38,6 +38,11 @@ public:
 	QualityMapperFactory();
 	virtual ~QualityMapperFactory() { delete editQuality; }
 
+	void initGlobalParameterList(RichParameterList& /*paramList*/)
+	{
+		// No global parameters needed for this plugin
+	}
+
 	virtual QString pluginName() const;
 
 	//get the edit tool for the given action
