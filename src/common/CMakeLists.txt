@@ -161,6 +161,7 @@ set(SOURCES
 	plugins/containers/render_plugin_container.cpp
 	plugins/interfaces/meshlab_plugin_logger.cpp
 	plugins/interfaces/decorate_plugin.cpp
+	plugins/interfaces/edit_plugin.cpp
 	plugins/interfaces/filter_plugin.cpp
 	plugins/interfaces/io_plugin.cpp
 	plugins/action_searcher.cpp
