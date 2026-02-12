@@ -31,12 +31,13 @@ A new editing tool that draws a closed polyline to cut through mesh triangles an
 The tool appears in its own **Dynart Tools** toolbar section, separate from the standard Edit toolbar.
 
 ### Global Undo/Redo (Ctrl+Z / Ctrl+Y)
-MeshLab has no built-in undo system. This fork adds a full-mesh snapshot undo/redo stack that works across **all filters and edit tools**:
+MeshLab has no built-in undo system. This fork adds a full undo/redo stack that works across **all filters and edit tools**:
 - **Ctrl+Z** — undo the last mesh-modifying operation
 - **Ctrl+Y** — redo the last undone operation
 - Available in the **Edit** menu as Undo/Redo entries
-- Supports up to **10 undo levels**
+- Supports up to **50 undo levels**
 - Covers all filter operations (delete, remesh, smooth, clean, etc.) and the Lasso Cut tool
+- Uses **CDC (Content-Defined Chunking) deduplication** — only changed mesh regions are stored, reducing memory usage by ~80-90% compared to full mesh copies
 
 ### Reload Confirmation Dialogs
 Added confirmation prompts before reloading meshes (`Reload` and `Reload All`) to prevent accidental loss of unsaved work.
