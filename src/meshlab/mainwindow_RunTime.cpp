@@ -140,6 +140,7 @@ void MainWindow::updateWindowMenu()
 		trackballStepMenu = windowsMenu->addMenu(tr("Trackball step"));
 		foreach(QAction *ac, trackballStepGroupAct->actions())
 			trackballStepMenu->addAction(ac);
+		windowsMenu->addAction(stereopsisBobAct);
 		
 		// View From File act
 		windowsMenu->addAction(readViewFromFileAct);
@@ -340,6 +341,7 @@ void MainWindow::updateMenus()
 	fullScreenAct->setEnabled(activeDoc);
 	showLayerDlgAct->setEnabled(activeDoc);
 	showTrackBallAct->setEnabled(activeDoc);
+	stereopsisBobAct->setEnabled(activeDoc);
 	resetTrackBallAct->setEnabled(activeDoc);
 	showInfoPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
@@ -377,6 +379,7 @@ void MainWindow::updateMenus()
 		
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
+		stereopsisBobAct->setChecked(GLA()->isStereopsisBobEnabled());
 		
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
@@ -418,6 +421,7 @@ void MainWindow::updateMenus()
 	}
 	else
 	{
+		stereopsisBobAct->setChecked(false);
 		for (DecoratePlugin* dp : PM.decoratePluginIterator()){
 			for (QAction* a : dp->actions()){
 				a->setChecked(false);
@@ -2529,6 +2533,12 @@ void MainWindow::showTrackBall()
 {
 	if(GLA() != 0)
 		GLA()->showTrackBall(!GLA()->isTrackBallVisible());
+}
+
+void MainWindow::toggleStereopsisBob()
+{
+	if (GLA() != 0)
+		GLA()->setStereopsisBobEnabled(!GLA()->isStereopsisBobEnabled());
 }
 
 void MainWindow::resetTrackBall()
