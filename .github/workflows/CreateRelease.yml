@@ -225,9 +225,9 @@ jobs:
     - name: Create MeshLab Portable Windows Archive
       run: |
         cd meshlab_windows_portable_x86_64
-        zip -r ../MeshLab${{steps.envs.outputs.ml_version}}-windows_x86_64.zip *
+        zip -r -9 ../MeshLab${{steps.envs.outputs.ml_version}}-windows_x86_64.zip *
         cd ../meshlab_windows_portable_double_x86_64
-        zip -r ../MeshLab${{steps.envs.outputs.ml_version_d}}-windows_x86_64.zip *
+        zip -r -9 ../MeshLab${{steps.envs.outputs.ml_version_d}}-windows_x86_64.zip *
         cd ..
 
     #Create release and upload
