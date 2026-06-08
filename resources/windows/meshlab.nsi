@@ -12,6 +12,9 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define DISTRIB_FOLDER "DISTRIB_PATH"
 
+; Set compression to highest available in 2026.
+SetCompressor /SOLID /FINAL lzma
+
 ; MUI 1.67 compatible -----
 !include "MUI.nsh"
 
