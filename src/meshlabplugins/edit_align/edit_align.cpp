@@ -285,7 +285,7 @@ void EditAlignPlugin::glueByPicking()
         ComputeRigidMatchMatrix(gluedPnt,freePnt,res);
 
     //md->mm()->cm.Tr=res;
-	currentNode()->tr() = currentNode()->tr() * res;
+	currentNode()->tr() = res * currentNode()->tr();
     QString buf;
     // for(size_t i=0;i<freePnt.size();++i)
     //		meshTree.cb(0,qUtf8Printable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
