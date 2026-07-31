@@ -203,8 +203,8 @@ QString SelectionFilterPlugin::filterInfo(ActionIDType filterId) const
 	case FP_SELECT_ALL: return tr("Select all the faces/vertices of the current mesh.");
 	case FP_SELECT_DELETE_VERT:
 		return tr(
-			"Delete the current set of selected vertices; faces that share one of the deleted "
-			"vertices are deleted too.");
+			"Delete the current set of selected vertices; faces and edges that share one of the "
+			"deleted vertices are deleted too.");
 	case FP_SELECT_DELETE_ALL_FACE:
 		return tr(
 			"Delete ALL faces, turning the mesh into a pointcloud. May be applied also to all "
@@ -549,6 +549,7 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 	vcg::CallBackPos* /*cb*/)
 {
 	MeshModel&             m = *(md.mm());
+	CMeshO::EdgeIterator   ei;
 	CMeshO::FaceIterator   fi;
 	CMeshO::VertexIterator vi;
 
@@ -561,7 +562,11 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 		tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 		int vvn = m.cm.vn;
+		int een = m.cm.en;
 		int ffn = m.cm.fn;
+		for (ei = m.cm.edge.begin(); ei != m.cm.edge.end(); ++ei)
+			if (!(*ei).IsD() && ((*ei).V(0)->IsS() || (*ei).V(1)->IsS()))
+				tri::Allocator<CMeshO>::DeleteEdge(m.cm, *ei);
 		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 			if (!(*fi).IsD() && (*fi).IsS())
 				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
@@ -571,7 +576,11 @@ std::map<std::string, QVariant> SelectionFilterPlugin::applyFilter(
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.updateBoxAndNormals();
-		log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
+		log(
+			"Deleted %i vertices, %i edges, %i faces.",
+			vvn - m.cm.vn,
+			een - m.cm.en,
+			ffn - m.cm.fn);
 	} break;
 
 	case FP_SELECT_DELETE_ALL_FACE: {
