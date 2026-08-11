@@ -173,7 +173,7 @@ void EditPointPlugin::decorate(MeshModel &m, GLArea * gla, QPainter* /*p*/)
            actual plane found by the algorithm (and the fitted points). */
         if (editType == SELECT_FITTING_PLANE_MODE) {
             fittingCircle.Clear();
-            vcg::tri::OrientedDisk<CMeshO>(fittingCircle, 192, fittingPlane.Projection(startingVertex->cP()), fittingPlane.Direction(), this->fittingRadius);
+            vcg::tri::OrientedDisk<CMeshO>(fittingCircle, fittingPlane.Projection(startingVertex->cP()), fittingPlane.Direction(), this->fittingRadius, 192);
 
             glBegin(GL_TRIANGLE_FAN);
             glColor4f(0.69f,0.93f,0.93f,.7f);

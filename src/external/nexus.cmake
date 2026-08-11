@@ -62,6 +62,9 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_NEXUS)
 		set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 		add_subdirectory(${NEXUS_DIR} EXCLUDE_FROM_ALL)
 		unset(CMAKE_POLICY_VERSION_MINIMUM)
+		set_target_properties(nexus PROPERTIES
+			CXX_STANDARD 14
+			CXX_STANDARD_REQUIRED ON)
 		add_library(external-nexus INTERFACE)
 		target_link_libraries(external-nexus INTERFACE nexus)
 	endif()
