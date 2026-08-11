@@ -257,7 +257,7 @@ RichParameterList FilterEmbreePlugin::initParameterList(const QAction *action,co
 
             break;
         case FP_SELECT_VISIBLE_FACES:
-            parlst.addParam(RichDirection("dir", Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
+            parlst.addParam(RichDirection("dir", vcg::Point3f(1.0f, 1.0f, 0.0f), "Direction", "This values indicates the direction of the shadows"));
             parlst.addParam(RichBool("incrementalSelection", false, "don't clean selection", "If checked, any previous selection of the faces will not be reset"));
             break;
         case FP_ANALYZE_NORMALS:
@@ -282,26 +282,26 @@ std::map<std::string, QVariant> FilterEmbreePlugin::applyFilter(const QAction * 
 {
 
     MeshModel *m = md.mm();
-    EmbreeAdaptor<CMeshO> adaptor = EmbreeAdaptor<CMeshO>(m->cm);
+    vcg::EmbreeAdaptor<CMeshO> adaptor = vcg::EmbreeAdaptor<CMeshO>(m->cm);
 
     switch(ID(action)) {
     case FP_OBSCURANCE:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
         adaptor.computeObscurance(m->cm, parameters.getInt("Rays"), parameters.getFloat("TAU"));
-        tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-        tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+        vcg::tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
+        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
         break;
     case FP_AMBIENT_OCCLUSION:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
         adaptor.computeAmbientOcclusion(m->cm,parameters.getInt("Rays"));
-        tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-        tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
+        vcg::tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
+        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityGray(m->cm);
         break;
     case FP_SDF:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
         adaptor.computeSDF(m->cm,parameters.getInt("Rays"), parameters.getFloat("cone_amplitude"));
-        tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
-        tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm);
+        vcg::tri::UpdateQuality<CMeshO>::VertexFromFace(m->cm);
+        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm);
         break;
     case FP_SELECT_VISIBLE_FACES:
         m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
