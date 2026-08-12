@@ -46,12 +46,12 @@ runs:
     - name: Cache external libraries sources
       id: cache-ext-libs
       if: ${{ inputs.cache-path != '' }}
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ inputs.cache-path }}
         key: ${{ runner.os }}-${{ inputs.cache-key }}
     - name: Ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         key: ${{ matrix.os }}-${{ github.ref }}-${{ inputs.build-precision }}
     - name: Configure and Build

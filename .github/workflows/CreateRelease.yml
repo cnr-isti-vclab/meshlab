@@ -17,7 +17,7 @@ jobs:
     name: Update ML_VERSION
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
     - name: Update MeshLab version
@@ -37,7 +37,7 @@ jobs:
         os: ['ubuntu-22.04', 'ubuntu-22.04-arm', 'macos-15-intel', 'macos-latest', 'windows-latest']
         precision: [single_precision, double_precision]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
         ref: main
@@ -81,12 +81,12 @@ jobs:
         win-certificate: ${{ secrets.WIN_CERTIFICATE }}
         win-certificate-pssw: ${{ secrets.WIN_CERTIFICATE_PSSW }}
     - name: Upload MeshLab Portable
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: MeshLab_${{ runner.os }}_portable${{steps.envs.outputs.artifact_suffix}}
         path: install/
     - name: Upload MeshLab Packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: MeshLab_${{ runner.os }}_packages${{steps.envs.outputs.artifact_suffix}}
         path: packages/MeshLab*
