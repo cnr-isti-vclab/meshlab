@@ -26,6 +26,8 @@
 *****************************************************************************/
 #include <Qt>
 
+#include <cstring>
+
 #include "io_tri.h"
 
 #include <wrap/io_trimesh/import_asc.h>
@@ -112,26 +114,32 @@ void TriIOPlugin::exportMaskCapability(const QString &, int &capability, int &de
 	return;
 }
  
-static inline void readbeOne(void * ptr,unsigned int sz,FILE* f) {
+static inline bool readbeOne(void * ptr,unsigned int sz,FILE* f) {
   unsigned char* array = new unsigned char[sz];
-  fread(array,sz,1,f);
+  if (fread(array,sz,1,f) != 1) {
+    delete [] array;
+    return false;
+  }
   for(unsigned int i = 0; i < sz; ++i) {
     memcpy((unsigned char *)(ptr)+i,&array[sz-1-i],1);
   }
   delete [] array;
+  return true;
 }
 
-size_t readOtherE(void * ptr,unsigned int sz,unsigned int cpt,FILE* f) {
+bool readOtherE(void * ptr,unsigned int sz,unsigned int cpt,FILE* f) {
   for (unsigned int i = 0; i < cpt; ++i) {
-    readbeOne((unsigned char *)(ptr)+i*sz, sz, f);
+    if (!readbeOne((unsigned char *)(ptr)+i*sz, sz, f))
+      return false;
   }
-  return cpt*sz;
+  return true;
 }
 
 int readHeader(FILE* fp, bool &TRIInverseBytes, int &numPoints, int &numFaces) {
   // Determine byte ordering
   unsigned short byteOrder;
-  fread(&byteOrder,sizeof(short),1,fp);
+  if (fread(&byteOrder,sizeof(short),1,fp) != 1)
+    return 1;
   if (byteOrder==0x4c45 || byteOrder==0x4542) {
     TRIInverseBytes=true;
   } else if (byteOrder==0x454c || byteOrder==0x4245) {
@@ -142,29 +150,49 @@ int readHeader(FILE* fp, bool &TRIInverseBytes, int &numPoints, int &numFaces) {
 
   // Get number of points and faces
   if (TRIInverseBytes) {
-    readOtherE(&numPoints,sizeof(int),1,fp);
-    readOtherE(&numFaces,sizeof(int),1,fp);
+    if (!readOtherE(&numPoints,sizeof(int),1,fp) ||
+        !readOtherE(&numFaces,sizeof(int),1,fp))
+      return 1;
   } else {
-    fread(&numPoints,sizeof(int),1,fp);
-    fread(&numFaces,sizeof(int),1,fp);
+    if (fread(&numPoints,sizeof(int),1,fp) != 1 ||
+        fread(&numFaces,sizeof(int),1,fp) != 1)
+      return 1;
   }
   // advance pointer ??
   char s[4];
-  fread(s,sizeof(char),4,fp);
-	printf("extara is %s (%d)\n", s, *(int*)(&s[0]));
+  if (fread(s,sizeof(char),4,fp) != 4)
+    return 1;
+
+  if (numPoints < 0 || numFaces < 0)
+    return 1;
+
+  const long dataBegin = ftell(fp);
+  if (dataBegin < 0 || fseek(fp, 0, SEEK_END) != 0)
+    return 1;
+  const long dataEnd = ftell(fp);
+  if (dataEnd < dataBegin || fseek(fp, dataBegin, SEEK_SET) != 0)
+    return 1;
+
+  const unsigned long long remainingBytes = static_cast<unsigned long long>(dataEnd - dataBegin);
+  const unsigned long long requiredBytes =
+      static_cast<unsigned long long>(numPoints) * 3 * sizeof(float) +
+      static_cast<unsigned long long>(numFaces) * 3 * sizeof(int);
+  if (requiredBytes > remainingBytes)
+    return 1;
   return 0;
 }
 
 static int readPoint(FILE* fp, bool TRIInverseBytes, float &x,float &y, float &z) {
   if (TRIInverseBytes) {
-    //printf("!!! Warning : not implemented\n");
-    readOtherE(&x,sizeof(float),1,fp);
-    readOtherE(&y,sizeof(float),1,fp);
-    readOtherE(&z,sizeof(float),1,fp);
+    if (!readOtherE(&x,sizeof(float),1,fp) ||
+        !readOtherE(&y,sizeof(float),1,fp) ||
+        !readOtherE(&z,sizeof(float),1,fp))
+      return 1;
   } else {
-    fread(&x,sizeof(float),1,fp);
-    fread(&y,sizeof(float),1,fp);
-    fread(&z,sizeof(float),1,fp);
+    if (fread(&x,sizeof(float),1,fp) != 1 ||
+        fread(&y,sizeof(float),1,fp) != 1 ||
+        fread(&z,sizeof(float),1,fp) != 1)
+      return 1;
   }
   return 0;
 }
@@ -183,14 +211,15 @@ static int readPoint(FILE* fp, bool TRIInverseBytes, float &x,float &y, float &z
 
 static int readFace(FILE *fp, bool TRIInverseBytes, int &p1, int &p2, int &p3) {
   if (TRIInverseBytes) {
-    //printf("!!! Warning : not implemented\n");
-    readOtherE(&p1,sizeof(int),1,fp);
-    readOtherE(&p2,sizeof(int),1,fp);
-    readOtherE(&p3,sizeof(int),1,fp);
+    if (!readOtherE(&p1,sizeof(int),1,fp) ||
+        !readOtherE(&p2,sizeof(int),1,fp) ||
+        !readOtherE(&p3,sizeof(int),1,fp))
+      return 1;
   } else {
-    fread(&p1,sizeof(int),1,fp);
-    fread(&p2,sizeof(int),1,fp);
-    fread(&p3,sizeof(int),1,fp);
+    if (fread(&p1,sizeof(int),1,fp) != 1 ||
+        fread(&p2,sizeof(int),1,fp) != 1 ||
+        fread(&p3,sizeof(int),1,fp) != 1)
+      return 1;
   }
   return 0;
 }
@@ -200,6 +229,10 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
   if (!fp) {
 		return false;
   }
+  struct FileCloser {
+    FILE *fp;
+    ~FileCloser() { fclose(fp); }
+  } fileCloser = {fp};
 
   int err = 0;
 
@@ -210,8 +243,7 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 
   if (err) {
    // Error::setError("Error parsing .tri\n");
-    fclose(fp);
-    return 1;
+    return false;
   }
 	qDebug("Reading a mesh of %i vert and %i faces",numPoints,numFaces);
 	
@@ -221,13 +253,13 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
   // Read points
   float x, y, z;
   for (int i = 0; i < numPoints; ++i) {
-    err = readPoint(fp, TRIInverseBytes, x, y, z);
+    err |= readPoint(fp, TRIInverseBytes, x, y, z);
+		if (err) return false;
 		m.vert[i].P()=Point3m(x, y, z);
   }
 
   if (err) {
     //Error::setError("Error parsing .tri\n");
-    fclose(fp);		
 		return false;
   }
 
@@ -235,9 +267,10 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
   int p1, p2, p3;
   for (int i = 0; i < numFaces; ++i) {
     err |= readFace(fp, TRIInverseBytes, p1, p2, p3);
-		assert(p1>=0 && p1<numPoints);
-		assert(p2>=0 && p2<numPoints);
-		assert(p3>=0 && p3<numPoints);
+		if (err || p1 < 0 || p1 >= numPoints ||
+		    p2 < 0 || p2 >= numPoints ||
+		    p3 < 0 || p3 >= numPoints)
+			return false;
 		
     m.face[i].V(0)= &m.vert[p1];
     m.face[i].V(1)= &m.vert[p2];
@@ -258,6 +291,8 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 			qDebug("Loading texture %s",qUtf8Printable(texPNG));
 			QStringList numList = infoPNG.split(" ", QString::SkipEmptyParts);
 			qDebug("Found %i numbers for %i faces",numList.size(),numFaces);
+			if (numFaces > numList.size() / 6)
+				return false;
 			for (int i = 0; i < numFaces ; ++i) 
 						{
 							for(int j=0;j<3;++j)
@@ -281,25 +316,23 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 				return false;
 
   if (!feof(fp) ) {
-			char texCode[4];
+			char texCode[5] = {};
 			bool floatFlag=false;
 			
-			fread(texCode,sizeof(char),4,fp);
-			qDebug("TexString code is '%s' (int:%d) (float:%f)\n", texCode, *(int*)(&texCode[0]),  *(float*)(&texCode[0]));
-
-			if(feof(fp)){
+			if (fread(texCode,sizeof(char),4,fp) != 4) {
 					qDebug("Premature end of file");
 					return false;
 				}
 
-			if(texCode==QString("TC00")) floatFlag=false;
+			qDebug("TexString code is '%s'\n", texCode);
+			if(strcmp(texCode, "TC00") == 0) floatFlag=false;
 			
 			m.textures.push_back(qUtf8Printable(texJPG));
 			qDebug("Loading texture %s",qUtf8Printable(texJPG));
 			
 			for (int i = 0; i < numFaces ; ++i) 
 			{
-				if(feof(fp)){
+					if(feof(fp)){
 					qDebug("Premature end of file after reading %i tex faces",i);
 					return false;
 				}
@@ -308,11 +341,13 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 				for(int j=0;j<3;++j)
 					{
 						if(floatFlag){
-							fread(&s,sizeof(float),1,fp);
-							fread(&t,sizeof(float),1,fp);
+							if (fread(&s,sizeof(float),1,fp) != 1 ||
+							    fread(&t,sizeof(float),1,fp) != 1)
+								return false;
 						} else {
-							fread(&ss,sizeof(short),1,fp);
-							fread(&ts,sizeof(short),1,fp);
+							if (fread(&ss,sizeof(short),1,fp) != 1 ||
+							    fread(&ts,sizeof(short),1,fp) != 1)
+								return false;
 							s=ss/float(textureJPG.width());
 							t=ts/float(textureJPG.height());
 						}
@@ -323,8 +358,6 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 					}
 			} 
   } // if ! eof
-  fclose(fp);
-
   if (err) return false;
   
 

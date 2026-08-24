@@ -328,7 +328,7 @@ void BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = tri::io::ImporterVMI<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)
 		{
-			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
+			throw MLException(errorMsgFormat.arg(fileName, tri::io::ImporterVMI<CMeshO>::ErrorMsg(result)));
 		}
 	}
 	else if (formatName.toUpper() == tr("GTS"))
