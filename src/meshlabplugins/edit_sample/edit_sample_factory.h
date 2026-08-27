@@ -38,6 +38,11 @@ public:
 	SampleEditFactory();
 	virtual ~SampleEditFactory() { delete editSample; }
 
+	void initGlobalParameterList(RichParameterList& /*paramList*/)
+	{
+		// No global parameters needed for this plugin
+	}
+
 	//returns the name of the plugin
 	virtual QString pluginName() const;
 
