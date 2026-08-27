@@ -280,7 +280,10 @@ bool SaveMeshAttributesDialog::shouldBeChecked(int bit, int /*capabilityBits*/, 
 
 void SaveMeshAttributesDialog::updateMask()
 {
-	int newmask = 0;
+	// Edge connectivity is topology, not an optional per-element attribute, and
+	// therefore has no checkbox in this dialog. Preserve it when the exporter
+	// includes it in its default mask.
+	int newmask = defaultBits & vcg::tri::io::Mask::IOM_EDGEINDEX;
 
 	if( ui->check_iom_vertflags->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
 	if( ui->check_iom_vertcolor->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
@@ -319,4 +322,3 @@ void SaveMeshAttributesDialog::on_textureQualitySpinBox_valueChanged(int arg1)
 		ui->textureQualitySpinBox->setSuffix("");
 	}
 }
-

@@ -668,7 +668,7 @@ void BaseMeshIOPlugin::saveProject(
 void BaseMeshIOPlugin::exportMaskCapability(const QString &format, int &capability, int &defaultBits) const
 {
 	if (format.toUpper() == tr("PLY")) {
-		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
+		capability = tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability() | tri::io::Mask::IOM_EDGEINDEX;
 		// For the default bits of the ply format disable flags and normals that usually are not useful.
 		defaultBits = capability;
 		defaultBits &= (~tri::io::Mask::IOM_FLAGS);
