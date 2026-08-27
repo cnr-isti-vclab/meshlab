@@ -208,6 +208,7 @@ private slots:
 	void showToolbarFile();
 	void showInfoPane();
 	void showTrackBall();
+	void toggleStereopsisBob();
 	void resetTrackBall();
 	void showLayerDlg(bool visible);
 	void showRaster();
@@ -453,6 +454,7 @@ private:
 	QAction* showToolbarStandardAct;
 	QAction* showInfoPaneAct;
 	QAction* showTrackBallAct;
+	QAction* stereopsisBobAct;
 	QAction* resetTrackBallAct;
 	QAction* showLayerDlgAct;
 	QAction* showRasterAct;

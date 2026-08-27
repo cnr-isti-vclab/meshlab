@@ -35,6 +35,7 @@
 
 #include <QTimer>
 #include <QTime>
+#include <QElapsedTimer>
 
 #include <common/plugins/interfaces/render_plugin.h>
 #include <common/plugins/interfaces/decorate_plugin.h>
@@ -177,7 +178,9 @@ public:
     bool isHelpVisible()      {return helpVisible;}
     bool isTrackBallVisible()		{return trackBallVisible;}
     bool isDefaultTrackBall()   {return activeDefaultTrackball;}
+    bool isStereopsisBobEnabled() const { return stereopsisBobEnabled; }
     void saveSnapshot();
+    void setStereopsisBobEnabled(bool enabled);
     void toggleHelpVisible()      {helpVisible = !helpVisible; update();}
   /*  void setBackFaceCulling(bool enabled);
     void setLight(bool state);
@@ -499,12 +502,21 @@ public slots:
     void updateRasterSetVisibilities();
 
 private slots:
+    void advanceStereopsisBob();
     void meshAdded(int index);
     void meshRemoved(int index);
 
 private:
     float cfps;
     float lastTime;
+    bool shouldStereopsisBob() const;
+    vcg::Point3f stereopsisBobEye(float cameraDist) const;
+    inline float stereopsisBobAmplitudeDegrees() const { return (glas.stereopsisBobAmount >= 0) ? glas.stereopsisBobAmount : 0.0f; }
+    inline float stereopsisBobFrequencyHz() const { return (glas.stereopsisBobSpeed >= 0) ? glas.stereopsisBobSpeed : 0.0f; }
+    inline int stereopsisBobFrameIntervalMs() const { return 16; }
+    bool stereopsisBobEnabled;
+    QTimer stereopsisBobTimer;
+    QElapsedTimer stereopsisBobClock;
 
     QImage snapBuffer;
     bool takeSnapTile;

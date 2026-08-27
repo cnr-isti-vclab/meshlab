@@ -36,6 +36,7 @@
 #include <QPainterPath>
 #include <QElapsedTimer>
 #include <QApplication>
+#include <cmath>
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
@@ -73,6 +74,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     activeDefaultTrackball=true;
     infoAreaVisible = true;
     trackBallVisible = glas.startupShowTrackball;
+    stereopsisBobEnabled = false;
     currentShader = NULL;
     lastFilterRef = NULL;
     //lastEditRef = NULL;
@@ -124,6 +126,8 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     }else{
         qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
     }
+    stereopsisBobTimer.setInterval(stereopsisBobFrameIntervalMs());
+    connect(&stereopsisBobTimer, SIGNAL(timeout()), this, SLOT(advanceStereopsisBob()));
 	lastloadedraster = -1;
 }
 
@@ -1634,7 +1638,19 @@ void GLArea::setView()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 0, cameraDist, 0, 0, 0, 0, 1, 0);
+    Point3f eye(0.0f, 0.0f, cameraDist);
+    if (shouldStereopsisBob()) {
+        if (!stereopsisBobClock.isValid())
+            stereopsisBobClock.start();
+        if (!stereopsisBobTimer.isActive())
+            stereopsisBobTimer.start();
+        eye = stereopsisBobEye(cameraDist);
+    }
+    else if (stereopsisBobTimer.isActive()) {
+        stereopsisBobTimer.stop();
+        stereopsisBobClock.invalidate();
+    }
+    gluLookAt(eye[0], eye[1], eye[2], 0, 0, 0, 0, 1, 0);
 }
 
 void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float /*cameraDist*/)
@@ -1686,6 +1702,47 @@ void GLArea::updateFps(float deltaTime)
     lastTime=deltaTime;
 }
 
+Point3f GLArea::stereopsisBobEye(float cameraDist) const
+{
+    if (stereopsisBobAmplitudeDegrees() <= 0.0f || stereopsisBobFrequencyHz() <= 0.0f)
+        return Point3f(0.0f, 0.0f, cameraDist);
+
+    const float elapsedSeconds = stereopsisBobClock.elapsed() / 1000.0f;
+    const float phase = elapsedSeconds * math::ToRad(360.0f) * stereopsisBobFrequencyHz();
+    const float radius = cameraDist * std::tan(math::ToRad(stereopsisBobAmplitudeDegrees()));
+    return Point3f(radius * std::cos(phase), radius * std::sin(phase), cameraDist);
+}
+
+bool GLArea::shouldStereopsisBob() const
+{
+    return stereopsisBobEnabled && stereopsisBobAmplitudeDegrees() > 0.0f && stereopsisBobFrequencyHz() > 0.0f;
+}
+
+void GLArea::setStereopsisBobEnabled(bool enabled)
+{
+    if (stereopsisBobEnabled == enabled)
+        return;
+
+    stereopsisBobEnabled = enabled;
+    if (stereopsisBobEnabled && stereopsisBobAmplitudeDegrees() > 0.0f && stereopsisBobFrequencyHz() > 0.0f) {
+        stereopsisBobClock.start();
+        stereopsisBobTimer.start();
+    }
+    else {
+        stereopsisBobTimer.stop();
+        stereopsisBobClock.invalidate();
+    }
+    update();
+}
+
+void GLArea::advanceStereopsisBob()
+{
+    if (shouldStereopsisBob())
+        update();
+    else if (stereopsisBobTimer.isActive())
+        stereopsisBobTimer.stop();
+}
+
 void GLArea::resetTrackBall()
 {
     makeCurrent();
@@ -1703,6 +1760,8 @@ void GLArea::resetTrackBall()
 void GLArea::hideEvent(QHideEvent * /*event*/)
 {
     trackball.current_button=0;
+    if (stereopsisBobTimer.isActive())
+        stereopsisBobTimer.stop();
 }
 
 void GLArea::sendViewPos(QString name)
@@ -2518,4 +2577,3 @@ MainWindow * GLArea::mw()
     }
     return qobject_cast<MainWindow *>(curParent);
 }
-
