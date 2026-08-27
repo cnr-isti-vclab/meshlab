@@ -520,6 +520,7 @@ void MainWindow::createToolBars()
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
 	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator()) {
+		if (iEditFactory->pluginName() == "EditCut") continue;
 		for(QAction* editAction: iEditFactory->actions()){
 			if (!editAction->icon().isNull()) {
 				editToolBar->addAction(editAction);
@@ -533,6 +534,16 @@ void MainWindow::createToolBars()
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
 	updateFilterToolBar();
+
+	dynartToolBar = addToolBar(tr("Dynart Tools"));
+	for(EditPlugin *iEditFactory: PM.editPluginFactoryIterator()) {
+		if (iEditFactory->pluginName() != "EditCut") continue;
+		for(QAction* editAction: iEditFactory->actions()){
+			if (!editAction->icon().isNull()) {
+				dynartToolBar->addAction(editAction);
+			}
+		}
+	}
 
 	QWidget *spacerWidget = new QWidget();
 	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -920,6 +931,12 @@ void MainWindow::loadDefaultSettingsFromPlugins()
 		for(QAction *decoratorAction : dp->actions()) {
 			dp->initGlobalParameterList(decoratorAction, defaultGlobalParams);
 		}
+	}
+
+	//edit settings
+	for (EditPlugin* ep : PM.editPluginFactoryIterator()) {
+		ep->initGlobalParameterList(defaultGlobalParams);
+		ep->setCurrentGlobalParamSet(&currentGlobalParams);
 	}
 
 	//io settings

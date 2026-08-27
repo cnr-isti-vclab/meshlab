@@ -104,6 +104,11 @@ void MainWindow::updateCustomSettings()
 {
 	mwsettings.updateGlobalParameterList(currentGlobalParams);
 	emit dispatchCustomSettings(currentGlobalParams);
+
+}
+RichParameterList& MainWindow::getCurrentParameterList()
+{
+	return currentGlobalParams;
 }
 
 void MainWindow::updateWindowMenu()
@@ -2196,6 +2201,15 @@ void MainWindow::reloadAllMesh()
 {
 	// Discards changes and reloads current file
 	// save current file name
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(
+		this,
+		tr("You are reloading all mesh!"),
+		tr("Are You sure to Reload?"),
+		QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::No) {
+		return;
+	}
 	qb->show();
 	QElapsedTimer t;
 	t.start();
@@ -2244,6 +2258,14 @@ void MainWindow::reload()
 		return;
 	// Discards changes and reloads current file
 	// save current file name
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+		tr("You are reloading the current mesh"),
+		tr("Are you sure to reload?"),
+		QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::No) {
+		return;
+	}
 	qb->show();
 
 	QString fileName = meshDoc()->mm()->fullName();
