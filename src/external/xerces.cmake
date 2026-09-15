@@ -45,7 +45,10 @@ elseif(MESHLAB_ALLOW_DOWNLOAD_SOURCE_XERCES)
 			external-xerces INTERFACE
 			${XERCES_C_DIR}/src
 			${MESHLAB_EXTERNAL_BINARY_DIR}/xerces-c-${XERCES_C_VER}/src)
-		add_library(XercesC::XercesC ALIAS external-xerces)
+		# Keep the package target imported so libE57's install export references
+		# XercesC::XercesC without requiring our local wrapper to be exported.
+		add_library(XercesC::XercesC INTERFACE IMPORTED GLOBAL)
+		target_link_libraries(XercesC::XercesC INTERFACE external-xerces)
 		install(TARGETS xerces-c DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 	endif()
 endif()
