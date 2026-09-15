@@ -76,7 +76,7 @@ QString pymeshlab::computePythonName(const QString& name)
 
 void pymeshlab::printSaveMask(int mask)
 {
-	for (uint i = 0; i < 14; i++){
+	for (size_t i = 0; i < capabilitiesBits.size(); i++){
 		if (mask & capabilitiesBits[i])
 			std::cout << saveCapabilitiesStrings[i].toStdString() << "\n";
 	}

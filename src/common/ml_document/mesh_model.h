@@ -105,6 +105,8 @@ public:
 		MM_VERTFLAGSELECT = 0x01000000,
 		MM_FACEFLAGSELECT = 0x02000000,
 
+		MM_EDGECOLOR      = 0x04000000,
+
 		// Per Mesh Stuff....
 		MM_CAMERA         = 0x08000000,
 		MM_TRANSFMATRIX   = 0x10000000,
@@ -184,6 +186,7 @@ public:
 	bool hasDataMask(const int maskToBeTested) const;
 
 	bool hasPerVertexColor() const;
+	bool hasPerEdgeColor() const;
 	bool hasPerVertexQuality() const;
 	bool hasPerVertexTexCoord() const;
 	bool hasPerFaceColor() const;

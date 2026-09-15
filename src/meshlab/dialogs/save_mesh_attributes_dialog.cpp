@@ -152,6 +152,7 @@ void SaveMeshAttributesDialog::on_listTextureName_itemDoubleClicked(QListWidgetI
 
 void SaveMeshAttributesDialog::on_AllButton_clicked()
 {
+	ui->check_iom_edgecolor->setChecked(ui->check_iom_edgecolor->isEnabled());
 	//vert
 	ui->check_iom_vertquality->setChecked(ui->check_iom_vertquality->isEnabled());
 	ui->check_iom_vertflags->setChecked(ui->check_iom_vertflags->isEnabled());
@@ -177,6 +178,7 @@ void SaveMeshAttributesDialog::on_AllButton_clicked()
 
 void SaveMeshAttributesDialog::on_NoneButton_clicked()
 {
+	ui->check_iom_edgecolor->setChecked(false);
 	//vert
 	ui->check_iom_vertquality->setChecked(false);
 	ui->check_iom_vertflags->setChecked(false);
@@ -202,6 +204,7 @@ void SaveMeshAttributesDialog::on_NoneButton_clicked()
 
 void SaveMeshAttributesDialog::setMaskCapability()
 {
+	checkAndEnable(ui->check_iom_edgecolor, vcg::tri::io::Mask::IOM_EDGECOLOR, capability, defaultBits);
 	//vert
 	checkAndEnable(ui->check_iom_vertquality,  vcg::tri::io::Mask::IOM_VERTQUALITY,  capability, defaultBits );
 	checkAndEnable(ui->check_iom_vertflags,    vcg::tri::io::Mask::IOM_VERTFLAGS,    capability, defaultBits);
@@ -265,6 +268,7 @@ void SaveMeshAttributesDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabi
 bool SaveMeshAttributesDialog::shouldBeEnabled(int iobit, int capabilityBits, int /*defaultBits*/)
 {
 	if( (iobit & capabilityBits) == 0 ) return false;
+	if (iobit == vcg::tri::io::Mask::IOM_EDGECOLOR && m->cm.EN() == 0) return false;
 	int mmbit = MeshModel::io2mm(iobit);
 	if(!m->hasDataMask(mmbit)) return false;
 	return true;
@@ -272,6 +276,7 @@ bool SaveMeshAttributesDialog::shouldBeEnabled(int iobit, int capabilityBits, in
 
 bool SaveMeshAttributesDialog::shouldBeChecked(int bit, int /*capabilityBits*/, int defaultBits)
 {
+	if (bit == vcg::tri::io::Mask::IOM_EDGECOLOR && m->cm.EN() == 0) return false;
 	if(!m->hasDataMask(MeshModel::io2mm(bit))) return false;
 	//if( (bit & meshBits) == 0 ) return false;
 	if( (bit & defaultBits) == 0 ) return false;
@@ -281,6 +286,10 @@ bool SaveMeshAttributesDialog::shouldBeChecked(int bit, int /*capabilityBits*/, 
 void SaveMeshAttributesDialog::updateMask()
 {
 	int newmask = 0;
+	if (m->cm.EN() > 0 && (capability & vcg::tri::io::Mask::IOM_EDGEINDEX))
+		newmask |= vcg::tri::io::Mask::IOM_EDGEINDEX;
+	if (ui->check_iom_edgecolor->isChecked())
+		newmask |= vcg::tri::io::Mask::IOM_EDGECOLOR | vcg::tri::io::Mask::IOM_EDGEINDEX;
 
 	if( ui->check_iom_vertflags->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
 	if( ui->check_iom_vertcolor->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}

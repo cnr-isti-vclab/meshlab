@@ -74,6 +74,7 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
 			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
 			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] &= mesh.EN() > 0 && meshmodel->hasPerEdgeColor();
 
 			//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
 			//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
@@ -97,6 +98,7 @@ void MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int mesh
     atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = bool(meshmodelmask & MeshModel::MM_VERTNORMAL);
     atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = bool(meshmodelmask & MeshModel::MM_FACENORMAL);
     atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = bool(meshmodelmask & MeshModel::MM_VERTCOLOR);
+    atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] = bool(meshmodelmask & MeshModel::MM_EDGECOLOR);
     atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = bool(meshmodelmask & MeshModel::MM_FACECOLOR);
     //atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = bool(meshmodelmask & MeshModel::MM_COLOR);
     atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = bool(meshmodelmask & MeshModel::MM_VERTTEXCOORD);
@@ -105,6 +107,10 @@ void MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int mesh
 
 void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModality( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::RendAtts& atts )
 {
+    if (pm != MLRenderingData::PR_WIREFRAME_EDGES)
+        atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] = false;
+    if (atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR])
+        atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = false;
     switch(pm)
     {
     case (MLRenderingData::PR_POINTS):
@@ -156,6 +162,7 @@ void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(
 		tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL];
 	}
 
+	tmp[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR];
 	tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
 	tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
 	tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
@@ -197,7 +204,8 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             dt.set(MLRenderingData::PR_SOLID,tmpatts);
         }
     
-		if (((meshmodel->cm.FN() == 0) && (meshmodel->cm.EN() > 0)) || (meshmodel->hasDataMask(MeshModel::MM_POLYGONAL)))
+		if (((meshmodel->cm.FN() == 0) && (meshmodel->cm.EN() > 0)) ||
+			(meshmodel->cm.EN() > 0 && meshmodel->hasPerEdgeColor()) || meshmodel->hasDataMask(MeshModel::MM_POLYGONAL))
 		{
 			//dt.reset();
 			tmpatts.reset();
@@ -209,7 +217,13 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
 			opts._peredge_wire_enabled = true;
 			opts._peredge_fauxwire_enabled = true;
 			dt.set(opts);
-			//dt.set(MLRenderingData::PR_SOLID, false);
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] = meshmodel->cm.EN() > 0 && meshmodel->hasPerEdgeColor();
+			if (tmpatts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR]) {
+				tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = false;
+				if (meshmodel->cm.FN() == 0)
+					dt.set(MLRenderingData::PR_POINTS, MLRenderingData::ATT_NAMES::ATT_VERTNORMAL, false);
+			}
+			dt.set(MLRenderingData::PR_WIREFRAME_EDGES, tmpatts);
 		}
         
     }
@@ -250,7 +264,7 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(bo
         }
     case(MLRenderingData::PR_WIREFRAME_EDGES):
         {
-            return (validvert) && ((meshmask & MeshModel::MM_POLYGONAL) || ((!validfaces) && (validedges)));
+            return validvert && ((meshmask & MeshModel::MM_POLYGONAL) || validedges);
         }
     case(MLRenderingData::PR_WIREFRAME_TRIANGLES):
     case(MLRenderingData::PR_SOLID):
@@ -278,6 +292,7 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(MLRend
 void MLPoliciesStandAloneFunctions::setAttributePriorities(MLRenderingData::RendAtts& atts )
 {
     atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= !(atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= !atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR];
     atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= !(atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
     atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= !(atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
 }
@@ -318,9 +333,11 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MLRenderingDat
             case (MLRenderingData::PR_WIREFRAME_EDGES):
             case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
                 {
+                    if (pm != (glopts._peredge_fauxwire_enabled ? MLRenderingData::PR_WIREFRAME_EDGES : MLRenderingData::PR_WIREFRAME_TRIANGLES))
+                        break;
                     glopts._perwire_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
-                    glopts._perwire_mesh_color_enabled &= !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
-                    glopts._perwire_fixed_color_enabled =  !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && !glopts._perwire_mesh_color_enabled;
+                    glopts._perwire_mesh_color_enabled &= !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR];
+                    glopts._perwire_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && !glopts._perwire_mesh_color_enabled;
                     break;
                 }
             case (MLRenderingData::PR_SOLID):
@@ -349,6 +366,7 @@ void MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask( Mesh
     atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= m->hasDataMask(MeshModel::MM_VERTNORMAL);
     atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= m->hasDataMask(MeshModel::MM_FACENORMAL);
     atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= m->hasDataMask(MeshModel::MM_VERTCOLOR);
+    atts[MLRenderingData::ATT_NAMES::ATT_EDGECOLOR] &= m->hasPerEdgeColor();
     atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= m->hasDataMask(MeshModel::MM_FACECOLOR);
     //atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR]
     atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= m->hasDataMask(MeshModel::MM_WEDGTEXCOORD);

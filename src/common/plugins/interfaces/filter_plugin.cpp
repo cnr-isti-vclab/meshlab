@@ -16,6 +16,9 @@ bool FilterPlugin::isFilterApplicable(const QAction* act, const MeshModel& m, QS
 	if (preMask == MeshModel::MM_NONE) // no precondition specified.
 		return true;
 
+	if ((preMask & MeshModel::MM_EDGECOLOR) && !m.hasPerEdgeColor())
+		MissingItems.push_back("Edge Color");
+
 	if (preMask & MeshModel::MM_VERTCOLOR && !m.hasDataMask(MeshModel::MM_VERTCOLOR))
 		MissingItems.push_back("Vertex Color");
 
@@ -90,6 +93,8 @@ int FilterPlugin::previewOnCreatedAttributes(const QAction* act, const MeshModel
 {
 	int changedIfCalled = postCondition(act);
 	int createdIfCalled = MeshModel::MM_NONE;
+	if ((changedIfCalled & MeshModel::MM_EDGECOLOR) && !mm.hasPerEdgeColor())
+		createdIfCalled |= MeshModel::MM_EDGECOLOR;
 	if ((changedIfCalled & MeshModel::MM_VERTCOLOR) && !mm.hasDataMask(MeshModel::MM_VERTCOLOR))
 		createdIfCalled = createdIfCalled | MeshModel::MM_VERTCOLOR;
 

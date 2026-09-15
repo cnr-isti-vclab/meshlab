@@ -103,6 +103,7 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 // The Main Edge Class
 class CEdgeO : public vcg::Edge<CUsedTypesO,
 		vcg::edge::BitFlags,          /*  4b */
+		vcg::edge::Color4b,
 		vcg::edge::EVAdj,
 		vcg::edge::EEAdj
 		>{

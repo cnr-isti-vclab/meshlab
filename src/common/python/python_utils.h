@@ -32,7 +32,7 @@ class RichParameter;
 
 namespace pymeshlab {
 
-const static std::array<int, 14> capabilitiesBits= {
+const static std::array<int, 15> capabilitiesBits= {
 	vcg::tri::io::Mask::IOM_VERTQUALITY,
 	vcg::tri::io::Mask::IOM_VERTFLAGS,
 	vcg::tri::io::Mask::IOM_VERTCOLOR,
@@ -46,10 +46,11 @@ const static std::array<int, 14> capabilitiesBits= {
 	vcg::tri::io::Mask::IOM_WEDGCOLOR,
 	vcg::tri::io::Mask::IOM_WEDGTEXCOORD,
 	vcg::tri::io::Mask::IOM_WEDGNORMAL,
-	vcg::tri::io::Mask::IOM_BITPOLYGONAL
+	vcg::tri::io::Mask::IOM_BITPOLYGONAL,
+	vcg::tri::io::Mask::IOM_EDGECOLOR
 };
 
-const static std::array<QString, 14> saveCapabilitiesStrings = {
+const static std::array<QString, 15> saveCapabilitiesStrings = {
 	"Save Vertex Quality",
 	"Save Vertex Flag",
 	"Save Vertex Color",
@@ -63,7 +64,8 @@ const static std::array<QString, 14> saveCapabilitiesStrings = {
 	"Save Wedge Color",
 	"Save Wedge TexCoord",
 	"Save Wedge Normal",
-	"Save Polygonal"
+	"Save Polygonal",
+	"Save Edge Color"
 };
 
 const char PYTHON_TYPE_ENUM[] = "str";

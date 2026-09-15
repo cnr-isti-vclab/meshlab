@@ -905,6 +905,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 					int updatemask = (existit->_mask ^ mm->dataMask()) | postcondmask;
 					bool connectivitychanged = false;
 					if (((unsigned int)mm->cm.VN() != existit->_nvert) || ((unsigned int)mm->cm.FN() != existit->_nface) ||
+							(size_t(mm->cm.EN()) != existit->_nedge) ||
 							bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) ||
 							bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
 							bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))

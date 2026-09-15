@@ -402,6 +402,7 @@ void BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	{
 		tri::io::PlyInfo pi;
 		pi.mask = mask;
+		if (!m.hasPerEdgeColor()) pi.mask &= ~tri::io::Mask::IOM_EDGECOLOR;
 
 		vcg::ply::PlyTypes scalarPlyType =
 				sizeof(Scalarm) == sizeof(float) ?

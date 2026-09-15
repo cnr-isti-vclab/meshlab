@@ -1,4 +1,5 @@
 #include "ml_render_gui.h"
+#include <common/ml_document/mesh_model.h>
 #include <QPushButton>
 #include <QLayout>
 #include <QLabel>
@@ -421,6 +422,11 @@ MLRenderingWireParametersFrame::~MLRenderingWireParametersFrame()
 
 void MLRenderingWireParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
+    MLPerViewGLOptions opts;
+    dt.get(opts);
+    const auto pm = opts._peredge_fauxwire_enabled ? MLRenderingData::PR_WIREFRAME_EDGES : MLRenderingData::PR_WIREFRAME_TRIANGLES;
+    foreach (MLRenderingAction* action, _shadingtool->getRenderingActions()) action->switchPrimitive(pm);
+    foreach (MLRenderingAction* action, _colortool->getRenderingActions()) action->switchPrimitive(pm);
     _shadingtool->setAccordingToRenderingData(dt);
     _colortool->setAccordingToRenderingData(dt);
     _edgetool->setAccordingToRenderingData(dt);
@@ -458,6 +464,7 @@ void MLRenderingWireParametersFrame::initGui()
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
 	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    _colortool->addRenderingAction(new MLRenderingPerEdgeColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _colortool));
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _colortool));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _colortool));
 	_colortool->addRenderingAction(new MLRenderingUserDefinedColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES, _meshid, _colortool));
@@ -509,6 +516,7 @@ void MLRenderingWireParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRe
 
 void MLRenderingWireParametersFrame::updateVisibility( MeshModel* mm )
 {
+    _wirelab->setText(mm && mm->cm.EN() > 0 ? "Explicit Edges" : "Polygonal Modality");
     _shadelab->setVisible(_shadingtool->updateVisibility(mm));
     _colorlab->setVisible(_colortool->updateVisibility(mm));
     _wirelab->setVisible(_edgetool->updateVisibility(mm));
@@ -545,8 +553,18 @@ void MLRenderingWireParametersFrame::switchWireModality(int meshid,MLRenderingAc
 	foreach(MLRenderingAction* shact, _shadingtool->getRenderingActions())
 		shact->switchPrimitive(pm);
 	
-	foreach(MLRenderingAction* colact, _colortool->getRenderingActions())
+	bool fallBackToVertexColor = false;
+	foreach(MLRenderingAction* colact, _colortool->getRenderingActions()) {
+		if (qobject_cast<MLRenderingPerEdgeColorAction*>(colact) &&
+			pm != MLRenderingData::PR_WIREFRAME_EDGES && colact->isChecked()) {
+			colact->setChecked(false);
+			fallBackToVertexColor = true;
+		}
 		colact->switchPrimitive(pm);
+	}
+	if (fallBackToVertexColor)
+		foreach(MLRenderingAction* colact, _colortool->getRenderingActions())
+			if (qobject_cast<MLRenderingPerVertexColorAction*>(colact)) colact->setChecked(true);
 
 	emit updateRenderingDataAccordingToActions(meshid, _shadingtool->getRenderingActions());
 	emit updateRenderingDataAccordingToActions(meshid, _colortool->getRenderingActions());
@@ -1212,6 +1230,7 @@ void MLRenderingOnOffToolbar::toggle(QAction* clickedact)
 
 void MLRenderingOnOffToolbar::setAccordingToRenderingData( const MLRenderingData& dt )
 {
+    _act->setChecked(_act->isRenderingDataEnabled(dt));
     _onact->setChecked(_act->isRenderingDataEnabled(dt));
     _offact->setChecked(!(_act->isRenderingDataEnabled(dt)));
 }

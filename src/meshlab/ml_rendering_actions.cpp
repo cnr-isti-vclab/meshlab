@@ -236,7 +236,7 @@ bool MLRenderingFauxEdgeWireAction::isRenderingDataEnabled( const MLRenderingDat
 
 bool MLRenderingFauxEdgeWireAction::isVisibleConditionValid( MeshModel* mm) const
 {
-    return mm->hasDataMask(MeshModel::MM_POLYGONAL);
+    return mm && (mm->hasDataMask(MeshModel::MM_POLYGONAL) || (mm->cm.EN() > 0 && mm->cm.FN() > 0));
 }
 
 MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( QObject* parent)
@@ -750,6 +750,48 @@ bool MLRenderingPerVertexColorAction::isVisibleConditionValid(MeshModel* mm) con
 	if (mm == NULL)
 		return false;
 	return mm->hasDataMask(MeshModel::MM_VERTCOLOR);
+}
+
+MLRenderingPerEdgeColorAction::MLRenderingPerEdgeColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(-1,parent),_pm(pm)
+{
+    setText(QString("Edge"));
+	setToolTip(QString("Color explicitly stored edges using their own colors"));
+}
+
+MLRenderingPerEdgeColorAction::MLRenderingPerEdgeColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
+{
+    setText(QString("Edge"));
+	setToolTip(QString("Color explicitly stored edges using their own colors"));
+}
+
+void MLRenderingPerEdgeColorAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
+	setEnabled(pr == MLRenderingData::PR_WIREFRAME_EDGES);
+}
+
+void MLRenderingPerEdgeColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerEdgeColorAction(_pm, meshId(), par);
+}
+
+void MLRenderingPerEdgeColorAction::updateRenderingData(MLRenderingData& rd )
+{
+    rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_EDGECOLOR,isChecked());
+}
+
+bool MLRenderingPerEdgeColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_EDGECOLOR,rd);
+}
+
+bool MLRenderingPerEdgeColorAction::isVisibleConditionValid(MeshModel* mm) const
+{
+	if (mm == NULL)
+		return false;
+	return mm->cm.EN() > 0 && mm->hasPerEdgeColor();
 }
 
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(QObject* parent)

@@ -6,6 +6,11 @@ void MeshModelState::create(int _mask, MeshModel* _m)
 {
 	m=_m;
 	changeMask=_mask;
+	if (changeMask & MeshModel::MM_EDGECOLOR) {
+		edgeColor.resize(m->cm.edge.size());
+		for (size_t i = 0; i < m->cm.edge.size(); ++i)
+			if (!m->cm.edge[i].IsD()) edgeColor[i] = m->cm.edge[i].C();
+	}
 	if(changeMask & MeshModel::MM_VERTCOLOR)
 	{
 		vertColor.resize(m->cm.vert.size());
@@ -89,6 +94,11 @@ bool MeshModelState::apply(MeshModel *_m)
 {
 	if(_m != m)
 		return false;
+	if (changeMask & MeshModel::MM_EDGECOLOR) {
+		if (edgeColor.size() != m->cm.edge.size()) return false;
+		for (size_t i = 0; i < m->cm.edge.size(); ++i)
+			if (!m->cm.edge[i].IsD()) m->cm.edge[i].C() = edgeColor[i];
+	}
 	if(changeMask & MeshModel::MM_VERTCOLOR)
 	{
 		if(vertColor.size() != m->cm.vert.size()) return false;

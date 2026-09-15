@@ -205,6 +205,7 @@ int MeshModel::io2mm(int single_iobit)
 	case tri::io::Mask::IOM_NONE         : return  MM_NONE;
 	case tri::io::Mask::IOM_VERTCOORD    : return  MM_VERTCOORD;
 	case tri::io::Mask::IOM_VERTCOLOR    : return  MM_VERTCOLOR;
+	case tri::io::Mask::IOM_EDGECOLOR    : return  MM_EDGECOLOR;
 	case tri::io::Mask::IOM_VERTFLAGS    : return  MM_VERTFLAG;
 	case tri::io::Mask::IOM_VERTQUALITY  : return  MM_VERTQUALITY;
 	case tri::io::Mask::IOM_VERTNORMAL   : return  MM_VERTNORMAL;
@@ -236,6 +237,11 @@ int MeshModel::io2mm(int single_iobit)
 bool MeshModel::hasDataMask(const int maskToBeTested) const
 {
 	return ((currentDataMask & maskToBeTested)!= 0);
+}
+
+bool MeshModel::hasPerEdgeColor() const
+{
+	return hasDataMask(MM_EDGECOLOR);
 }
 
 bool MeshModel::hasPerVertexColor() const
@@ -270,7 +276,8 @@ bool MeshModel::hasPerFaceWedgeTexCoords() const
 
 void MeshModel::updateDataMask()
 {
-	currentDataMask = MM_NONE;
+	// Edge storage is always allocated; only explicitly enabled colors are data.
+	currentDataMask &= MM_EDGECOLOR;
 	currentDataMask |=
 			MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG |
 			MM_VERTQUALITY | MM_VERTCOLOR;
@@ -364,6 +371,8 @@ void MeshModel::clearDataMask(int unneededDataMask)
 
 void MeshModel::enable(int openingFileMask)
 {
+	if (openingFileMask & tri::io::Mask::IOM_EDGECOLOR)
+		updateDataMask(MM_EDGECOLOR);
 	if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD )
 		updateDataMask(MM_VERTTEXCOORD);
 	if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD )

@@ -210,6 +210,25 @@
       </widget>
      </item>
      <item>
+      <widget class="QGroupBox" name="edgeGroupBox">
+       <property name="title"><string>Edge</string></property>
+       <layout class="QVBoxLayout" name="edgeLayout">
+        <item>
+         <widget class="QCheckBox" name="check_iom_edgecolor">
+          <property name="text"><string>Edge Color</string></property>
+          <property name="toolTip"><string>Save colors of explicitly stored edges.</string></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="edgeSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="groupBox_4">
        <property name="title">
         <string>Texture Name</string>

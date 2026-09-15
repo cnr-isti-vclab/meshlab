@@ -16,4 +16,13 @@ option(MESHLAB_USE_DEFAULT_BUILD_AND_INSTALL_DIRS "If set to OFF, it expects tha
 
 option(MESHLAB_IS_NIGHTLY_VERSION "Nightly version of meshlab will be used instead of ML_VERSION" OFF)
 
+option(MESHLAB_BUILD_TESTS "Build focused MeshLab regression tests" OFF)
+if(MESHLAB_BUILD_TESTS)
+    enable_testing()
+endif()
+
 add_subdirectory(src)
+
+if(MESHLAB_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()

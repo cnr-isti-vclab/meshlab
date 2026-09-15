@@ -320,6 +320,22 @@ private:
     MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
+class MLRenderingPerEdgeColorAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingPerEdgeColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerEdgeColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+	bool isVisibleConditionValid(MeshModel * mm) const;
+private:
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
+};
+
 class MLRenderingPerFaceColorAction : public MLRenderingAction
 {
     Q_OBJECT

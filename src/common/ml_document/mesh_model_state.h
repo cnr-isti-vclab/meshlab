@@ -50,6 +50,7 @@ private:
 	MeshModel *m; // the mesh which the changes refers to.
 	std::vector<float> vertQuality;
 	std::vector<vcg::Color4b> vertColor;
+	std::vector<vcg::Color4b> edgeColor;
 	std::vector<vcg::Color4b> faceColor;
 	std::vector<Point3m> vertCoord;
 	std::vector<Point3m> vertNormal;
