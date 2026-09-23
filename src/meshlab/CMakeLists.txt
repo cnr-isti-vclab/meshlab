@@ -101,3 +101,22 @@ install(
 	TARGETS meshlab
 	DESTINATION ${MESHLAB_BIN_INSTALL_DIR}
 	COMPONENT MeshLab)
+
+if(WIN32)
+    set_target_properties(meshlab PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/distrib/$<CONFIG>"
+    )
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${Qt_DIR}/../../../bin")
+
+    if(WINDEPLOYQT_EXECUTABLE)
+        add_custom_command(TARGET meshlab POST_BUILD
+            COMMAND ${WINDEPLOYQT_EXECUTABLE} 
+                $<$<CONFIG:Debug>:--debug>
+                $<$<CONFIG:Release>:--release>
+                --no-compiler-runtime
+                "$<TARGET_FILE:meshlab>"
+            COMMENT "Deploying Qt dependencies to distrib/$<CONFIG>..."
+        )
+    endif()
+endif()
+
