@@ -134,6 +134,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 	lastisor_SmoothFlag          = true;
 	lastisor_SwapFlag            = true;
 	lastisor_ProjectFlag         = true;
+	lastisor_CheckSurfDist       = true;
 	lastisor_FeatureDeg          = 30.0f;
 }
 
