@@ -763,10 +763,10 @@ std::map<std::string, QVariant> FilterLayerPlugin::applyFilter(
 					rm.shot.Extrinsics.SetTra(Point3f(-pos[0], -pos[1], -pos[2]));
 					rm.shot.Extrinsics.SetRot(mat);
 
+					// k1, k2 from the Bundler file are read and discarded: vcg::Camera is a
+					// pinhole camera with no lens distortion model, so the images are taken
+					// as already undistorted. (They were always zeroed here before.)
 					rm.shot.Intrinsics.FocalMm = f;
-					rm.shot.Intrinsics.k[0] =
-						0.0; // k1; To be uncommented when distortion is taken into account reliably
-					rm.shot.Intrinsics.k[1]        = 0.0; // k2;
 					rm.shot.Intrinsics.PixelSizeMm = vcg::Point2f(1, 1);
 					QSize        size;
 					QImageReader sizeImg(rm.currentPlane->fullPathFileName);

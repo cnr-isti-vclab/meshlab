@@ -2000,8 +2000,8 @@ void GLArea::initializeShot(Shotm &shot)
     shot.Intrinsics.PixelSizeMm[0]=0.036916077f;
     shot.Intrinsics.PixelSizeMm[1]=0.036916077f;
 
-    shot.Intrinsics.DistorCenterPx[0]=width()/2;
-    shot.Intrinsics.DistorCenterPx[1]=height()/2;
+    // vcg::Camera is a pinhole camera: it no longer has DistorCenterPx or the
+    // k[] radial coefficients, which were never set to a meaningful value here.
     shot.Intrinsics.CenterPx[0]=width()/2;
     shot.Intrinsics.CenterPx[1]=height()/2;
     shot.Intrinsics.ViewportPx[0]=width();
@@ -2122,8 +2122,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     int w = shot.Intrinsics.ViewportPx[0];
     int h = shot.Intrinsics.ViewportPx[1];
 
-    shot.Intrinsics.DistorCenterPx[0]=w/2;
-    shot.Intrinsics.DistorCenterPx[1]=h/2;
+    // No DistorCenterPx to set: vcg::Camera has no lens distortion model.
     shot.Intrinsics.CenterPx[0]=w/2;
     shot.Intrinsics.CenterPx[1]=h/2;
     shot.Intrinsics.ViewportPx[0]=w;

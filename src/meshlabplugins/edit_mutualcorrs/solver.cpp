@@ -474,12 +474,10 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
 	qDebug("ViewportPx.Y %i", cam.ViewportPx.Y());
 	qDebug("CenterPx.X %f", cam.CenterPx[0]);
 	qDebug("CenterPx.Y %f", cam.CenterPx[1]);
-	qDebug("DistorntedCenterPx.X %f", cam.DistorCenterPx[0]);
-	qDebug("DistorntedCenterPx.Y %f", cam.DistorCenterPx[1]);
+	// DistorCenterPx and k1, k2 are no longer printed: vcg::Camera has no
+	// lens distortion model, and this solver never estimated them.
 	qDebug("PixelSizeMm.X %f", cam.PixelSizeMm[0]);
 	qDebug("PixelSizeMm.Y %f", cam.PixelSizeMm[1]);
-	qDebug("k1 %f", cam.k[0]);
-	qDebug("k2 %f", cam.k[1]);
 	qDebug("Tra %f %f %f", shot.Extrinsics.Tra().X(), shot.Extrinsics.Tra().Y(), shot.Extrinsics.Tra().Z());
 	for (int i = 0; i<4; i++)
 		qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0], (shot.Extrinsics.Rot())[i][1], (shot.Extrinsics.Rot())[i][2], (shot.Extrinsics.Rot())[i][3]);
@@ -524,12 +522,10 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
 	qDebug("ViewportPx.Y %i", cam.ViewportPx.Y());
 	qDebug("CenterPx.X %f", cam.CenterPx[0]);
 	qDebug("CenterPx.Y %f", cam.CenterPx[1]);
-	qDebug("DistortedCenterPx.X %f", cam.DistorCenterPx[0]);
-	qDebug("DistortedCenterPx.Y %f", cam.DistorCenterPx[1]);
+	// DistorCenterPx and k1, k2 are no longer printed: vcg::Camera has no
+	// lens distortion model, and this solver never estimated them.
 	qDebug("PixelSizeMm.X %f", cam.PixelSizeMm[0]);
 	qDebug("PixelSizeMm.Y %f", cam.PixelSizeMm[1]);
-	qDebug("k1 %f", cam.k[0]);
-	qDebug("k2 %f", cam.k[1]);
 	qDebug("Tra %f %f %f", shot.Extrinsics.Tra().X(), shot.Extrinsics.Tra().Y(), shot.Extrinsics.Tra().Z());
 	for (int i = 0; i<4; i++)
 		qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0], (shot.Extrinsics.Rot())[i][1], (shot.Extrinsics.Rot())[i][2], (shot.Extrinsics.Rot())[i][3]);
