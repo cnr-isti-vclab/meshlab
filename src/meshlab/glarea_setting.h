@@ -72,6 +72,10 @@ public:
 	inline static QString wheelDirectionParam() {return "MeshLab::Appearance::wheelDirection";}
 	bool startupShowTrackball;
 	inline static QString showTrackballParam() {return "MeshLab::Appearance::showTrackball";}
+	Scalarm stereopsisBobAmount;
+	inline static QString stereopsisBobAmountParam() {return "MeshLab::Appearance::stereopsisBobAmount";}
+	Scalarm stereopsisBobSpeed;
+	inline static QString stereopsisBobSpeedParam() {return "MeshLab::Appearance::stereopsisBobSpeed";}
 	int matrixDecimalPrecision;
 	inline static QString matrixDecimalPrecisionParam() {return "MeshLab::Appearance::matrixDecimalPrecision";}
 

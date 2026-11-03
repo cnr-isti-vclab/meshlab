@@ -29,6 +29,8 @@ void GLAreaSetting::initGlobalParameterList(RichParameterList& defaultGlobalPara
 
 	defaultGlobalParamSet.addParam(RichBool(wheelDirectionParam(), false, "Wheel Direction", "If true, inverts the direction of the mouse wheel for zooming in/out in the MeshLab canvas."));
 	defaultGlobalParamSet.addParam(RichBool(showTrackballParam(), true, "Show Trackball", "If true, show the trackball on startup."));
+	defaultGlobalParamSet.addParam(RichFloat(stereopsisBobAmountParam(), 10.0, "Stereopsis Bob Amount", "Angular size of the circular bobbing motion, in degrees, around the nominal camera position."));
+	defaultGlobalParamSet.addParam(RichFloat(stereopsisBobSpeedParam(), 0.2f, "Stereopsis Bob Speed", "Speed of the circular bobbing motion, in cycles per second."));
 	defaultGlobalParamSet.addParam(RichInt(matrixDecimalPrecisionParam(), 2, "Rotation Matrix Precision", "Number of decimal values shown in the rotation matrix"));
 }
 
@@ -54,7 +56,13 @@ void GLAreaSetting::updateGlobalParameterSet( const RichParameterList& rps )
 	pointSmooth = rps.getBool(this->pointSmoothParam());
 	pointSize = rps.getFloat(this->pointSizeParam());
 	wheelDirection = rps.getBool(this->wheelDirectionParam());
-        startupShowTrackball = rps.getBool(showTrackballParam());
+	startupShowTrackball = rps.getBool(showTrackballParam());
+	stereopsisBobAmount = rps.getFloat(this->stereopsisBobAmountParam());
+	if (stereopsisBobAmount < 0)
+		stereopsisBobAmount = 0;
+	stereopsisBobSpeed = rps.getFloat(this->stereopsisBobSpeedParam());
+	if (stereopsisBobSpeed < 0)
+		stereopsisBobSpeed = 0;
 	matrixDecimalPrecision = rps.getInt(this->matrixDecimalPrecisionParam());
 	currentGlobalParamSet=&rps;
 }

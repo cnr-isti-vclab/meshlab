@@ -292,6 +292,13 @@ connectRenderModeActionList(rendlist);*/
 	showTrackBallAct->setShortcut(Qt::SHIFT + Qt::Key_H);
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
+	stereopsisBobAct = new QAction(tr("Stereopsis &Bob"), this);
+	stereopsisBobAct->setCheckable(true);
+	stereopsisBobAct->setShortcutContext(Qt::ApplicationShortcut);
+	stereopsisBobAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_B);
+	stereopsisBobAct->setToolTip(tr("Orbit the current view slightly left and right to add motion-based depth cues."));
+	connect(stereopsisBobAct, SIGNAL(triggered()), this, SLOT(toggleStereopsisBob()));
+
 	resetTrackBallAct = new QAction(tr("Reset &Trackball"), this);
 	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
 #if defined(Q_OS_MAC)
@@ -609,6 +616,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showRasterAct);
 	viewMenu->addSeparator();
 	viewMenu->addAction(showTrackBallAct);
+	viewMenu->addAction(stereopsisBobAct);
 	viewMenu->addAction(resetTrackBallAct);
 	viewMenu->addSeparator();
 	viewMenu->addAction(toggleOrthoAct);
