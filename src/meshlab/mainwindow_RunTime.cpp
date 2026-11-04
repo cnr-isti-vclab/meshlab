@@ -1962,7 +1962,44 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 	if (layerDialog != NULL)
 		showLayerDlg(layervisible || meshDoc()->meshNumber());
 	setCurrentMeshBestTab();
+	if (res && !mwsettings.autoStartTools.isEmpty()) {
+		// with an empty fileName the files are chosen in a dialog inside importMesh,
+		// so look at the mesh that has just been loaded
+		QString opened = fileName;
+		if (opened.isEmpty() && meshDoc() != nullptr && meshDoc()->mm() != nullptr)
+			opened = meshDoc()->mm()->fullName();
+		startToolForFile(opened);
+	}
 	return res;
+}
+
+void MainWindow::startToolForFile(const QString& fileName)
+{
+	const QString tool = mwsettings.autoStartTools.value(QFileInfo(fileName).suffix().toLower());
+	if (tool.isEmpty() || GLA() == nullptr)
+		return;
+	auto matches = [&tool](const QAction* a) {
+		return a->text().remove('&').compare(tool, Qt::CaseInsensitive) == 0;
+	};
+	if (GLA()->getCurrentEditAction() == nullptr) {
+		for (EditPlugin* iEditFactory : PM.editPluginFactoryIterator()) {
+			for (QAction* editAction : iEditFactory->actions()) {
+				if (matches(editAction) && editAction->isEnabled()) {
+					editAction->trigger();
+					return;
+				}
+			}
+		}
+	}
+	for (FilterPlugin* iFilter : PM.filterPluginIterator()) {
+		for (const QAction* filterAction : iFilter->actions()) {
+			if (matches(filterAction)) {
+				startFilter(filterAction);
+				return;
+			}
+		}
+	}
+	meshDoc()->Log.log(GLLogStream::SYSTEM, "Auto-start of tool \"" + tool + "\" failed: no such edit tool or filter.");
 }
 
 // Opening files in a transparent form (IO plugins contribution is hidden to user)

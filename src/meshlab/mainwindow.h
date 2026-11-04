@@ -66,7 +66,7 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-	static void initGlobalParameterList(RichParameterList& gbllist);
+	static void initGlobalParameterList(RichParameterList& gbllist, const QStringList& editToolNames = QStringList());
 	void updateGlobalParameterList(const RichParameterList& rpl);
 
 	std::ptrdiff_t maxgpumem;
@@ -101,6 +101,11 @@ public:
 
 	bool sendAnonymousData;
 	inline static QString sendAnonymousDataParam() {return "MeshLab::System::sendAnonymousData"; }
+
+	// Rules in the form "ext=Tool name; ext2=Tool name 2". After a mesh with a
+	// matching extension is opened, the edit tool or filter with that name is started.
+	QMap<QString, QString> autoStartTools; // lowercase extension -> tool name
+	inline static QString autoStartToolParam() {return "MeshLab::GUI::autoStartTool"; }
 };
 
 class MainWindow : public QMainWindow
@@ -135,6 +140,7 @@ private slots:
 
 public slots:
 	bool importMeshWithLayerManagement(QString fileName=QString());
+	void startToolForFile(const QString& fileName);
 	bool importRaster(const QString& fileImg = QString());
 	bool openProject(QString fileName=QString(), bool append = false);
 	bool appendProject(QString fileName=QString());

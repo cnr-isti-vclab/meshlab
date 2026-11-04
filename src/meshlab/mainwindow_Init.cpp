@@ -949,7 +949,11 @@ void MainWindow::loadMeshLabSettings()
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
-	MainWindowSetting::initGlobalParameterList(defaultGlobalParams);
+	QStringList editToolNames;
+	for (EditPlugin* iEditFactory : PM.editPluginFactoryIterator())
+		for (QAction* editAction : iEditFactory->actions())
+			editToolNames << editAction->text().remove('&');
+	MainWindowSetting::initGlobalParameterList(defaultGlobalParams, editToolNames);
 	GLArea::initGlobalParameterList(defaultGlobalParams);
 
 	QSettings settings;
@@ -967,8 +971,17 @@ void MainWindow::loadMeshLabSettings()
 		{
 			RichParameter* rp = nullptr;
 			bool b = RichParameterAdapter::create(docElem, rp);
-			if (b && defaultGlobalParams.hasParameter(rp->name()))
-				currentGlobalParams.pushFromQDomElement(docElem);
+			if (b && defaultGlobalParams.hasParameter(rp->name())) {
+				const RichParameter& def = defaultGlobalParams.getParameterByName(rp->name());
+				if (def.value().typeName() == rp->value().typeName()) {
+					// keep the saved value, but take description and tooltip from the
+					// defaults, so that they reflect the current version (and plugins)
+					currentGlobalParams.addParam(def);
+					currentGlobalParams.setValue(rp->name(), rp->value());
+				}
+				else
+					currentGlobalParams.pushFromQDomElement(docElem);
+			}
 			if (b)
 				delete rp;
 		}
@@ -1264,7 +1277,7 @@ int MainWindow::longestActionWidthInAllMenus()
 	return longest;
 }
 
-void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
+void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist, const QStringList& editToolNames)
 {
 	gbllist.addParam(RichInt(maximumDedicatedGPUMem(), 350, "Maximum GPU Memory Dedicated to MeshLab (Mb)", "Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
 	gbllist.addParam(RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
@@ -1280,6 +1293,7 @@ void MainWindowSetting::initGlobalParameterList(RichParameterList& gbllist)
 	gbllist.addParam(RichInt(startupWindowHeightParam(), 0, "Startup Window Height (in pixels)", "Window height on startup"));
 	gbllist.addParam(RichString(meshSetNameParam(), "ms", "Name of the MeshSet object.", "Set the MeshSet name object in the PyMeshLab call copied in the clipboard from the filter dock dialog."));
 	gbllist.addParam(RichBool(checkForUpdateParam(), true, "Automatic online check for updated version of MeshLab", "If true, MeshLab periodically will check online if a new version has been released"));
+	gbllist.addParam(RichString(autoStartToolParam(), "", "Tools to start automatically after opening a file", "Semicolon separated list of rules \"extension=Tool name\" (e.g. \"ply=Quality Mapper\"). After a file with that extension is opened, the named edit tool or filter is started. A tool name is the text of its menu entry: for filters, the name shown in the Filters menu. Leave empty to disable." + (editToolNames.isEmpty() ? QString() : " Available edit tools: " + editToolNames.join(", ") + ".")));
 	gbllist.addParam(RichBool(sendAnonymousDataParam(), true, "Send anonymous and aggregate statistics", "If true, MeshLab periodically will send a few aggregated statistic of usage (number of opened and saved mesh and total number of vertices loaded)"));
 }
 
@@ -1297,6 +1311,19 @@ void MainWindowSetting::updateGlobalParameterList(const RichParameterList& rpl)
 	meshSetName = rpl.getString(meshSetNameParam());
 	checkForUpdate = rpl.getBool(checkForUpdateParam());
 	sendAnonymousData = rpl.getBool(sendAnonymousDataParam());
+
+	autoStartTools.clear();
+	for (const QString& rule : rpl.getString(autoStartToolParam()).split(';', QString::SkipEmptyParts)) {
+		int eq = rule.indexOf('=');
+		if (eq < 0)
+			continue;
+		QString ext = rule.left(eq).trimmed().toLower();
+		if (ext.startsWith('.'))
+			ext.remove(0, 1);
+		QString tool = rule.mid(eq + 1).trimmed();
+		if (!ext.isEmpty() && !tool.isEmpty())
+			autoStartTools[ext] = tool;
+	}
 }
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
