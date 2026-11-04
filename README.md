@@ -1,17 +1,47 @@
-# ![MeshLab Logo](src/meshlab/images/eye64.png) MeshLab
+# ![MeshLab Logo](src/meshlab/images/eye64.png) MeshLab by Dynart
 
+*A custom fork of [MeshLab](https://www.MeshLab.net) with enhanced selection workflow and usability improvements.*
 
-[![BuildMeshLab](https://github.com/cnr-isti-vclab/meshlab/actions/workflows/BuildMeshLab.yml/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions/workflows/BuildMeshLab.yml)
+---
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5114037.svg)](https://doi.org/10.5281/zenodo.5114037)
+Based on MeshLab — an open source, portable, and extensible system for the processing and editing of unstructured large 3D triangular meshes. Built on top of the [VCGlib](http://www.vcglib.net) C++ mesh processing library developed at the [Visual Computing Lab](http://vcg.isti.cnr.it) of [ISTI - CNR](http://www.isti.cnr.it).
 
-This is the official repository for the source and the binaries of [MeshLab](https://www.MeshLab.net).
+## New Features
 
-MeshLab is an open source, portable, and extensible system for the processing and editing of unstructured large 3D triangular meshes. It is aimed to help the processing of the typical not-so-small unstructured models arising in 3D scanning, providing a set of tools for editing, cleaning, healing, inspecting, rendering and converting this kind of meshes.
+### Inverted CTRL Selection Behavior
+The default MeshLab selection workflow requires holding CTRL to **add** to an existing selection, while a bare drag **replaces** the selection. This fork inverts that behavior:
+- **Drag** now **adds** to the current selection by default
+- **CTRL + Drag** starts a **new** selection (clearing the previous one)
+- This is configurable via a global parameter (`Invert CTRL Behavior`) accessible in MeshLab settings, so you can switch back to the original behavior at any time
 
-MeshLab is mostly based on the open source C++ mesh processing library [VCGlib](http://www.vcglib.net) developed at the [Visual Computing Lab](http://vcg.isti.cnr.it) of [ISTI - CNR](http://www.isti.cnr.it). VCG can be used as a stand-alone large-scale automated mesh processing pipeline, while MeshLab makes it easy to experiment with its algorithms interactively.
+This change applies to all rectangle-based selection tools: **Select Faces**, **Select Vertices**, **Select Connected Components**, and **Select Faces/Vertices inside polyline area**.
 
-MeshLab is available for Windows, macOS, and Linux.
+### Global Parameter System for Edit Plugins
+Edit plugins now support persistent global parameters through the MeshLab settings system. This allows edit tools to expose user-configurable options that are saved across sessions. The `EditPlugin` base class provides `initGlobalParameterList` and `setCurrentGlobalParamSet` for any plugin to register its own settings.
+
+### Lasso Cut Tool (`edit_cut`)
+A new editing tool that draws a closed polyline to cut through mesh triangles and select the inside region:
+- **Click** to add polyline points
+- **Q** — cut edges along the polyline and add inside faces to selection
+- **W** — subtract inside faces from selection
+- **D** / **A** / **I** — deselect all / select all / invert selection
+- **Delete** — delete selected faces (uses MeshLab's standard filter with full undo/redo support)
+- **C** — clear polyline, **Backspace** — undo last point, **Escape** — clear polyline
+
+The tool appears in its own **Dynart Tools** toolbar section, separate from the standard Edit toolbar.
+
+### Global Undo/Redo (Ctrl+Z / Ctrl+Y)
+MeshLab has no built-in undo system. This fork adds a full-mesh snapshot undo/redo stack that works across **all filters and edit tools**:
+- **Ctrl+Z** — undo the last mesh-modifying operation
+- **Ctrl+Y** — redo the last undone operation
+- Available in the **Edit** menu as Undo/Redo entries
+- Supports up to **10 undo levels**
+- Covers all filter operations (delete, remesh, smooth, clean, etc.) and the Lasso Cut tool
+
+### Reload Confirmation Dialogs
+Added confirmation prompts before reloading meshes (`Reload` and `Reload All`) to prevent accidental loss of unsaved work.
+
+---
 
 # Releases
 

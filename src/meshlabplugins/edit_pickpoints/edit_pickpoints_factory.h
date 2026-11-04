@@ -38,6 +38,11 @@ public:
 	EditPickPointsFactory();
 	virtual ~EditPickPointsFactory() { delete editPickPoints; }
 
+	void initGlobalParameterList(RichParameterList& /*paramList*/)
+	{
+		// No global parameters needed for this plugin
+	}
+
 	virtual QString pluginName() const;
 
 	//get the edit tool for the given action
